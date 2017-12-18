@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="2.5" xmlns="http://java.sun.com/xml/ns/javaee"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee 
+	http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
+	 <display-name>WXTestDemo</display-name>
+	  <servlet>
+    <servlet-name>getSignatureServlet</servlet-name>
+    <servlet-class>com.rj.sign.GetSignature</servlet-class>
+  	  </servlet>
+  <servlet-mapping>
+    <servlet-name>getSignatureServlet</servlet-name>
+    <url-pattern>/getSignatureServlet</url-pattern>
+  </servlet-mapping>
+  
+<!--   根据code获取用户信息 -->
+  <servlet>
+    <servlet-name>getUserInfoByCodeServlet</servlet-name>
+    <servlet-class>com.rj.sign.GetUserInfoByCode</servlet-class>
+  	  </servlet>
+  <servlet-mapping>
+    <servlet-name>getUserInfoByCodeServlet</servlet-name>
+    <url-pattern>/getUserInfoByCodeServlet</url-pattern>
+  </servlet-mapping>
+  <!--  initialize初始化 -->
+   <servlet>
+    <servlet-name>initializeServlet</servlet-name>
+    <servlet-class>com.rj.sign.Initialize</servlet-class>
+  	  </servlet>
+  <servlet-mapping>
+    <servlet-name>initializeServlet</servlet-name>
+    <url-pattern>/initializeServlet</url-pattern>
+  </servlet-mapping>
+<!--   根据经纬度获得具体地点 -->
+ <servlet>
+    <servlet-name>getAddressByTXServlet</servlet-name>
+    <servlet-class>com.rj.sign.GetAddressByTX</servlet-class>
+  	  </servlet>
+  <servlet-mapping>
+    <servlet-name>getAddressByTXServlet</servlet-name>
+    <url-pattern>/getAddressByTXServlet</url-pattern>
+  </servlet-mapping>
+<!--   根据两个坐标获取之间距离 -->
+<servlet>
+    <servlet-name>GetDistanceServlet</servlet-name>
+    <servlet-class>com.rj.sign.GetDistance</servlet-class>
+  	  </servlet>
+  <servlet-mapping>
+    <servlet-name>GetDistanceServlet</servlet-name>
+    <url-pattern>/GetDistanceServlet</url-pattern>
+  </servlet-mapping>
+<!--   打卡方法 -->
+<servlet>
+    <servlet-name>SignInServlet</servlet-name>
+    <servlet-class>com.rj.sign.SignIn</servlet-class>
+  	  </servlet>
+  <servlet-mapping>
+    <servlet-name>SignInServlet</servlet-name>
+    <url-pattern>/SignInServlet</url-pattern>
+  </servlet-mapping>
+  <!--   转换坐标 -->
+<servlet>
+    <servlet-name>SwitchZBServlet</servlet-name>
+    <servlet-class>com.rj.sign.SwitchZB</servlet-class>
+  	  </servlet>
+  <servlet-mapping>
+    <servlet-name>SwitchZBServlet</servlet-name>
+    <url-pattern>/SwitchZBServlet</url-pattern>
+  </servlet-mapping>
+<!--   根据时间获取打卡记录 -->
+  <servlet>
+    <servlet-name>GetRecordByDayServlet</servlet-name>
+    <servlet-class>com.rj.sign.GetRecordByDay</servlet-class>
+  	  </servlet>
+  <servlet-mapping>
+    <servlet-name>GetRecordByDayServlet</servlet-name>
+    <url-pattern>/GetRecordByDayServlet</url-pattern>
+  </servlet-mapping>
+<!--   根据月份获取当前月份考勤记录 -->
+  <servlet>
+    <servlet-name>GetSignDayByMonthServlet</servlet-name>
+    <servlet-class>com.rj.sign.GetSignDayByMonth</servlet-class>
+  	  </servlet>
+  <servlet-mapping>
+    <servlet-name>GetSignDayByMonthServlet</servlet-name>
+    <url-pattern>/GetSignDayByMonthServlet</url-pattern>
+  </servlet-mapping>
+  
+  <servlet>    
+    <servlet-name>AxisServlet</servlet-name>    
+    <servlet-class>org.apache.axis2.transport.http.AxisServlet</servlet-class>    
+    <load-on-startup>2</load-on-startup>    
+</servlet>         
+<servlet-mapping>    
+           <servlet-name>AxisServlet</servlet-name>    
+           <url-pattern>/services/*</url-pattern>    
+</servlet-mapping>  
+  
+	 <listener>
+    <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+  </listener>
+  <listener>   
+    <listener-class>com.rj.sign.JobForWXAccessTokenListener</listener-class>   
+</listener> 
+
+  <context-param>
+    <param-name>contextConfigLocation</param-name>
+    <param-value>classpath:applicationContext.xml</param-value>
+  </context-param>
+</web-app>

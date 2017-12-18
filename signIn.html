@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html>
+<meta charset="UTF-8">
+<meta http-equiv="Access-Control-Allow-Origin" content="*">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"> 
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<head>
+<link rel="stylesheet" href="css/style.css?v=5.9" type="text/css" >
+
+
+  <script type="text/javascript" async>
+  function  getSignDayByMonth(flag)
+  {
+	//获取当月的考勤情况
+  	$(function(){
+  		var month = calUtil.showYear+"-"+calUtil.showMonth;
+  		$.ajax({  
+      	 	type : "POST", 
+      	    contentType : "application/json", 
+      	    url : "./GetSignDayByMonthServlet?cardNo="+cardNo+"&month="+month+"&flag="+flag, 
+      	    dataType : 'json', 
+      	    success : function(result) { 
+      	    	var data =  result.signDayList;
+      	    	signList = eval(data);
+      	    	 calUtil.init(signList);
+      	    },
+      	    error : function(xhr, status, errMsg)
+              {
+                   alert("获取当月考勤信息失败!");
+                   return;
+              }
+      }); 
+  	});
+  }
+  </script> 
+  <script type="text/javascript" async>
+  
+function getAddress(lat,lng)
+	{ 
+	$.ajax({  
+	 	type : "POST", 
+	    contentType : "application/json", 
+	    url : "./getAddressByTXServlet?lat="+lat+"&lng="+lng+"&flag=1", 
+	    dataType : 'json', 
+	    success : function(result) { 
+	    	var address = result.title;
+	    	flag = result.flag;
+	    	lat1 = result.lat;
+	    	lng1 = result.lng;
+	    	document.getElementById('address').innerHTML=address; 
+	    },
+	    error : function(xhr, status, errMsg)
+        {
+             alert("获取地址信息失败!");
+             return;
+        }
+}); 
+  	} 
+</script> 
+  <script type="text/javascript">
+  	function getRecord(date){
+ 	 	$.ajax({  
+		type : "POST", 
+		contentType : "application/json", 
+		url : "./GetRecordByDayServlet?date=" + date+"&cardNo="+cardNo, 
+		dataType : 'json', 
+	    success : function(result) { 
+	    	var data =  result.recordsList;
+	    	var data2 = eval(data);
+	    	var html = "<table width='100%'> <tr><th class = 'rtime' align = 'center'>时间</th><th class = 'location' align = 'center'>方式</th></tr>";  
+	        for(var i in data2)
+	  	 {
+	        	var obj = data2[i];
+	        	html= html+"<tr><td  align = 'center'>"+obj.entryDT+"</td><td align = 'center'>"+obj.signInName+"</td></tr>";  
+		 }
+	        html= html+"</table>";  
+	        document.getElementById("recordsByday").innerHTML=html;  
+	    },
+	    error : function(xhr, status, errMsg)
+        {
+             alert("传输失败!");
+        }
+}); 
+  	}
+// function test()
+// 	{ 
+// 	$.ajax({  
+// 		type : "POST", 
+// 		contentType : "application/json", 
+// 		url : "./getUserInfoByCodeServlet?code=" + GetQueryString("code"), 
+// 		dataType : 'json', 
+// 	    success : function(result) { 
+// 	    	var a = result.src;
+// 	    	alert(a);
+// 	   		 window.location.href= a;
+// 		 	return;
+// 	    },
+// 	    error : function(xhr, status, errMsg)
+//         {
+//              alert("传输失败!");
+//         }
+// }); 
+//   	} 
+</script> 
+<script type="text/javascript" async>
+      function refresh(){
+    	  isInitFinish ="";
+    	  //再次获取一下位置信息
+    	  wx.getLocation({
+      	    type: 'wgs84', // 默认为wgs84的gps坐标，如果要返回直接给openLocation用的火星坐标，可传入'gcj02'
+      	    success: function (res) {
+      	        latitude = res.latitude; // 纬度，浮点数，范围为90 ~ -90
+      	        longitude = res.longitude; // 经度，浮点数，范围为180 ~ -180。
+      	        var speed = res.speed; // 速度，以米/每秒计
+      	        var accuracy = res.accuracy; // 位置精度
+      	    	$.ajax({  
+      	    	 	type : "POST", 
+      	    	    contentType : "application/json", 
+      	    	    url : "./getAddressByTXServlet?lat="+latitude+"&lng="+longitude+"&flag=1", 
+      	    	    dataType : 'json', 
+      	    	    success : function(result) { 
+      	    	    	var address = result.title;
+      	    	    	flag = result.flag;
+      	    	    	lat1 = result.lat;
+      	    	    	lng1 = result.lng;
+      	    	    	document.getElementById('address').innerHTML=address; 
+						//刷新时间
+						var today1 = result.today;
+    	    		     disptime(today1);
+      	    	    	//判断距离是否超过限制,如果超过限制,显示outofRange DIV,否则显示SignAll DIV
+      	    	    	if(flag=='out'){
+      	    	    	$("#outofRange").fadeIn();
+      	    	    	isInitFinish = "X";
+      	    	    	document.getElementById("signAll").style.display="none";//隐藏
+      	    	    	}else{
+      	    	    		$("#signAll").fadeIn();
+      	    	    		isInitFinish = "X";
+      	    	   	 		document.getElementById("outofRange").style.display="none";//隐藏
+      	    	    	}
+      	    	    	 //显示当前位置
+      	    	  	var iframe = document.getElementById("iframe");
+ 	      	       	iframe.src = "http://apis.map.qq.com/ws/staticmap/v2/?center="+lat1+","+lng1+"&zoom=16&markers=color:blue|label:A|"+lat1+","+lng1+"&key=3PHBZ-UBAR4-TMNU5-DSW62-ZHX72-T5BDW&size=400*350";
+      	    	    },
+      	    	    error : function(xhr, status, errMsg)
+      	            {
+      	                 alert("获取地址信息失败!");
+      	                 return;
+      	            }
+      	    }); 
+      	    },
+      	    error: function(res){
+//                   alert("有错误！");
+      	    	 return;
+   		},
+   	    fail: function(res){
+              alert("请打开定位服务并对企业微信开放定位！");
+   	    	 return;
+              
+  		},
+   	    	cancel: function(res){
+             	 alert("用户取消授权!");
+   	    		 return;
+  		}
+      	});
+    	
+     }
+   </script>
+ <script type = "text/javascript" async>
+ function getRule(){
+	 document.getElementById("ruleDiv").style.display="display";//隐藏规则页面
+ }
+ </script>  
+<script type="text/javascript" async>
+      function sign(){
+    	  //再次获取一下位置信息
+    	             wx.getLocation({
+	            	    type: 'wgs84', // 默认为wgs84的gps坐标，如果要返回直接给openLocation用的火星坐标，可传入'gcj02'
+	            	    success: function (res) {
+	            	        var lat = res.latitude; // 纬度，浮点数，范围为90 ~ -90
+	            	        var lng = res.longitude; // 经度，浮点数，范围为180 ~ -180。
+	            	        //先判断当前位置是否超过打卡范围
+	            	        getAddress(lat,lng);
+	            	    	$.ajax({  
+	            		 	type : "POST", 
+	            		    contentType : "application/json", 
+	            		    url : "./GetDistanceServlet?lat=" +lat+"&lng="+lng, 
+	            		    dataType : 'json', 
+	            		    success : function(result) { 
+	            				if(result.flag=="out"){
+	            					alert("您当前地点已经超过打卡范围！");
+	            					return;
+	            				}else{
+	            					var id = result.id; 
+	            					//在距离内,调用打卡Servlet
+	            					  $.ajax({  
+	            						 	type : "POST", 
+	            						    contentType : "application/json", 
+	            						    url : "./SignInServlet?cardNo="+cardNo+"&id="+id, 
+	            						    dataType : 'json', 
+	            						    success : function(result) { 
+	            								if(result.result=='success'){
+	            									  //执行后台Servlet,看打卡信息是否成功,如果返回成功那么则执行下面的代码
+	            							    	  document.getElementById("signAll").style.display="none";//隐藏
+	            							    	  document.getElementById("address").style.display="none";//隐藏
+	            							    	  document.getElementById("logo").style.display="none";//隐藏
+	            							    	  document.getElementById("ifreamdiv").style.display="none";//隐藏
+	            							    	  //显示打卡成功的DIV
+	            							    	 var div1 = document.getElementById("success");
+	            							    	 $("#success").slideDown("slow");
+	            							    	 $("#record").slideDown("fast");
+	            							    	 //显示打卡记录
+	            							    	var data =  result.recordList;
+	            							    	var data2 = eval(data);
+	            							    	var html = "<table width='100%'> <tr><th class = 'rtime' align = 'left'>时间</th><th class = 'location' align = 'right'>方式</th></tr>";  
+	            							    	
+	            							        for(var i in data2)
+	            							  	 {
+	            							        	var obj = data2[i];
+	            							        	html= html+"<tr><td  align = 'left'>"+obj.entryDT+"</td><td align = 'right'>"+obj.signInName+"</td></tr>";  
+												 }
+	            							        html= html+"</table>";  
+	            							        document.getElementById("record").innerHTML=html;  
+	            							        
+	            								}else{
+	            									 alert("打卡失败，请稍后再试！");
+	            									 return;
+	            								}
+	            						    },
+	            						    error : function(xhr, status, errMsg)
+	            					        {
+	            					             alert("打卡失败!");
+	            					             return;
+	            					        }
+	            					});
+	            				}
+	            		    },
+	            		    error : function(xhr, status, errMsg)
+	            	        {
+	            	             alert("获取距离失败!");
+	            	             return;
+	            	        }
+	            	});
+	            	    },
+	            	    error: function(res){
+//	                         alert("有错误！");
+	            	    	 return;
+	         		},
+	         	    fail: function(res){
+	                     alert("请打开定位服务并对企业微信开放定位！");
+	         	    	 return;
+	                    
+	     		},
+	         	    	cancel: function(res){
+	                    	 alert("用户取消授权!");
+	         	    		 return;
+	     		}
+	            	});
+    	
+     }
+   </script>
+<!-- 判断是手机还是电脑 -->
+  <script type="text/javascript" async>
+function IsPC() {
+    var userAgentInfo = navigator.userAgent;
+    var Agents = ["Android", "iPhone",
+                "SymbianOS", "Windows Phone",
+                "iPad", "iPod"];
+    var flag = true;
+    for (var v = 0; v < Agents.length; v++) {
+        if (userAgentInfo.indexOf(Agents[v]) > 0) {
+            flag = false;
+            break;
+        }
+    }
+    return flag;
+}
+</script> 
+
+<script src = "http://map.qq.com/api/js?v=2.exp&key=NPABZ-G7LW4-DBLUP-XI2QT-4VCHE-UXFTD" async></script>
+<script type="text/javascript" src="js/jweixin-1.2.0.js"></script>
+<script type="text/javascript" src="js/jquery-1.4.3.min.js"></script>
+<script type="text/javascript" src="js/jshaker.js"></script>
+<link rel="stylesheet" type="text/css" href="css/sign.css"/>
+<script type="text/javascript" src="js/calendar.js"></script>
+  <script>
+ function tdClick(node){
+	  var obj = document.getElementById('table1').getElementsByTagName('td');
+	    for (var i = 0; i < obj.length; i ++) obj[i].onclick = function() {
+	       //把日和年月组合在一起
+	    document.getElementById('calendar_month_span').innerHTML = calUtil.showYear+"年"+calUtil.showMonth+"月"+this.innerHTML+"日";
+	    var dateuse = calUtil.showYear+"-"+calUtil.showMonth+"-"+this.innerHTML;  
+	    getRecord(dateuse);
+	    };
+		$('#table1 td').each(function(){
+            $(this).click(function(){
+                $(this).css("background-color","#e3e3e4");//设置点击td的颜色
+                $(this).css("border-radius","55%");
+                $('#table1 td').not(this).css("background-color","transparent");//其他的全部设置为透明
+            });
+        });
+	}
+</script>
+
+<script type="text/javascript" >
+var latitude;
+var longitude;
+var lat1;
+var lng1;
+var flag;
+var cardNo;
+var today;
+var timer1;
+var signList;
+var isInitFinish;
+window.onload=function(){
+	var flag = IsPC();
+	if(flag){
+// 		 window.location.href="PCError.html";
+// 		 return;
+	}
+	var  a = window.location.href;
+	$.ajax({ 
+	    type : "POST", 
+	    contentType : "application/json", 
+	    url : "./initializeServlet?url=" + a, 
+	    dataType : 'json', 
+	    success : function(result) { 
+	        var timestamp = result.timestamp; 
+	        var noncestr = result.noncestr; 
+	        var signature =result.signature;
+	        cardNo = result.CardNo;
+	        if(result.CardNo==null){
+// 	        	 window.location.href="userInfoError.html";
+// 	        	 return;
+	       }
+	            //添加图片
+	            $("div .subMenu>img").each(function () {
+	                var name = $(this).attr("data-imgname");
+	                if(name=="signIn"){
+	                	var src = "images/" + name + "_active.png"
+	                	   //设置img的属性和值。
+		                $(this).attr("src", src);
+	                }else{
+	                	 var src = "images/" + name + ".png"
+	                	   //设置img的属性和值。
+	 	                $(this).attr("src", src);
+	                }
+	            });
+	            // 自动点击第一个菜单
+// 	            $("div.subMenu")[0].click();
+
+	            //点击事件
+	            $("div.subMenu").click(function () {
+	                var $img = $(this).children("img");
+	                var name = $img.attr("data-imgname");
+	                if(name=="rule"){
+	                	//如果页面还没刷新的话则不进入规则页面
+	                	if(isInitFinish!="X"){
+	                		return;
+	                	}
+						//激活图片,熄灭其他图片
+						$("#ruleImg").attr("src", "images/rule_active.png");
+						$("#defaultImg").attr("src", "images/signIn.png");
+						$("#riliImg").attr("src", "images/calendar.png");
+	                	$("#ruleDiv").fadeIn();
+	                	document.getElementById("signAll").style.display="none";//隐藏
+						document.getElementById("outofRange").style.display="none";//隐藏
+  						document.getElementById("address").style.display="none";//隐藏
+	            		document.getElementById("logo").style.display="none";//隐藏
+	            		document.getElementById("ifreamdiv").style.display="none";//隐藏
+						document.getElementById("success").style.display="none";//隐藏
+						document.getElementById("calendar").style.display="none";//隐藏
+						document.getElementById("recordsByday").style.display="none";//隐藏
+						document.getElementById("record").style.display="none";//隐藏打卡记录页面
+	                }
+	                if(name=="signIn"){
+// 	                	激活图片,熄灭其他图片
+						$("#ruleImg").attr("src", "images/rule.png");
+						$("#defaultImg").attr("src", "images/signIn_active.png");
+						$("#riliImg").attr("src", "images/calendar.png");
+	                	$("#logo").fadeIn();
+	                	//刷新操作
+	                	refresh();
+	                	$("#address").fadeIn();
+	                	$("#ifreamdiv").fadeIn();
+	                	document.getElementById("calendar").style.display="none";//隐藏
+						document.getElementById("recordsByday").style.display="none";//隐藏
+						document.getElementById("ruleDiv").style.display="none";//隐藏规则页面
+						document.getElementById("record").style.display="none";//隐藏打卡记录页面
+	                }
+	                if(name=="calendar"){
+	                	//如果页面还没刷新的话则不进入日历页面 
+	                	if(isInitFinish!="X"){
+	                		return;
+	                	}
+	                	$("#ruleImg").attr("src", "images/rule.png");
+						$("#defaultImg").attr("src", "images/signIn.png");
+						$("#riliImg").attr("src", "images/calendar_active.png");
+	                	//获取当月的考勤情况
+	                	$(function(){
+	                		var current = new Date();
+	                		var month1= current.getMonth()+1
+	                        var month = current.getFullYear()+"-"+month1;
+	                		$.ajax({  
+	                    	 	type : "POST", 
+	                    	    contentType : "application/json", 
+	                    	    url : "./GetSignDayByMonthServlet?cardNo="+cardNo+"&month="+month, 
+	                    	    dataType : 'json', 
+	                    	    success : function(result) { 
+	                    	    	var data =  result.signDayList;
+	                    	    	signList = eval(data);
+	                		    	 //ajax获取日历json数据
+	                		       calUtil.eventName="load";
+	                		  	   calUtil.init(signList);
+	                    	    },
+	                    	    error : function(xhr, status, errMsg)
+	                            {
+	                                 alert("获取当月考勤信息失败!");
+	                                 return;
+	                            }
+	                    }); 
+	                	});
+	                	//隐藏其他控件
+	                	document.getElementById("signAll").style.display="none";//隐藏
+						document.getElementById("outofRange").style.display="none";//隐藏
+  						document.getElementById("address").style.display="none";//隐藏
+	            		document.getElementById("logo").style.display="none";//隐藏
+	            		document.getElementById("ifreamdiv").style.display="none";//隐藏
+						document.getElementById("success").style.display="none";//隐藏
+						document.getElementById("ruleDiv").style.display="none";//隐藏规则页面
+						document.getElementById("record").style.display="none";//隐藏打卡记录页面
+	                	//显示日历
+	                	$("#calendar").fadeIn();
+	                	$("#recordsByday").fadeIn();
+	                }
+	            });
+	        today = result.today;
+	        disptime(today);
+	        wx.config({  
+	        	beta: true,// 必须这么写，否则在微信插件有些jsapi会有问题
+	        	debug: false, //开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。  
+                appId: 'ww237859bf33ceef7f', //必填，公众号的唯一标识  
+                timestamp: timestamp, // 必填，生成签名的时间戳  
+                nonceStr: noncestr, //必填，生成签名的随机串 
+                signature: signature,// 必填，签名，见附录1  
+                jsApiList: ['onMenuShareTimeline','onMenuShareAppMessage','onMenuShareQQ',  
+                            'onMenuShareWeibo','onMenuShareQZone','chooseImage',  
+                            'uploadImage','downloadImage','startRecord','stopRecord',  
+                            'onVoiceRecordEnd','playVoice','pauseVoice','stopVoice',  
+                            'translateVoice','openLocation','getLocation','hideOptionMenu',  
+                            'showOptionMenu','closeWindow','hideMenuItems','showMenuItems',  
+                            'showAllNonBaseMenuItem','hideAllNonBaseMenuItem'] //必填，需要使用的JS接口列表，所有JS接口列表 见附录2  
+            }); 
+	    } ,
+        error : function(xhr, status, errMsg)
+        {
+             alert("获取微信API失败!");
+             return;
+        }
+	}); 
+
+	wx.ready(function(){
+        // config信息验证后会执行ready方法，所有接口调用都必须在config接口获得结果之后，config是一个客户端的异步操作，所以如果需要在页面加载时就调用相关接口，则须把相关接口放在ready函数中调用来确保正确执行。对于用户触发时才调用的接口，则可以直接调用，不需要放在ready函数中。
+        wx.getLocation({
+    	    type: 'wgs84', // 默认为wgs84的gps坐标，如果要返回直接给openLocation用的火星坐标，可传入'gcj02'
+    	    success: function (res) {
+    	        latitude = res.latitude; // 纬度，浮点数，范围为90 ~ -90
+    	        longitude = res.longitude; // 经度，浮点数，范围为180 ~ -180。
+    	        var speed = res.speed; // 速度，以米/每秒计
+    	        var accuracy = res.accuracy; // 位置精度
+    	    	$.ajax({  
+    	    	 	type : "POST", 
+    	    	    contentType : "application/json", 
+    	    	    url : "./getAddressByTXServlet?lat="+latitude+"&lng="+longitude+"&flag=1", 
+    	    	    dataType : 'json', 
+    	    	    success : function(result) { 
+    	    	    	var address = result.title;
+    	    	    	flag = result.flag;
+    	    	    	lat1 = result.lat;
+    	    	    	lng1 = result.lng;
+    	    	    	document.getElementById('address').innerHTML=address; 
+    	    	    	 //判断距离是否超过限制,如果超过限制,显示outofRange DIV,否则显示SignAll DIV
+    	    	    	if(flag=='out'){
+    	    	    	$("#outofRange").fadeIn();
+    	    	    	isInitFinish = "X";
+    	    	    	document.getElementById("signAll").style.display="none";//隐藏
+    	    	    	}else{
+    	    	    		$("#signAll").fadeIn();
+    	    	    		isInitFinish = "X";
+    	    	   	 		document.getElementById("outofRange").style.display="none";//隐藏
+    	    	    	}
+    	    	    	 //显示当前位置
+    	 				var iframe = document.createElement("iframe");
+    	     	    	var div = document.getElementById("ifreamdiv");
+    	     	      	iframe.id ="iframe";
+    	     	      	iframe.src = "http://apis.map.qq.com/ws/staticmap/v2/?center="+lat1+","+lng1+"&zoom=16&markers=color:blue|label:A|"+lat1+","+lng1+"&key=3PHBZ-UBAR4-TMNU5-DSW62-ZHX72-T5BDW&size=400*350";
+    	     	      	 iframe.style.width = "100%";
+    	     	      	 iframe.style.height = "100%";
+    	     	      	 iframe.style.scrolling="no";
+    	     	      	 iframe.setAttribute("className", "ifream"); 
+    	     	      	 iframe.setAttribute('frameborder', 0);
+    	     	      	div.appendChild(iframe);
+    	    	    },
+    	    	    error : function(xhr, status, errMsg)
+    	            {
+    	                 alert("获取地址信息失败!");
+    	                 return;
+    	            }
+    	    }); 
+    	    },
+    	    error: function(res){
+//                 alert("有错误！");
+    	    	 return;
+ 		},
+ 	    fail: function(res){
+            alert("请打开定位服务并对企业微信开放定位！");
+ 	    	 return;
+            
+		},
+ 	    	cancel: function(res){
+           	 alert("用户取消授权!");
+ 	    		 return;
+		}
+    	});
+    });
+}
+</script>
+<script>
+// document.onreadystatechange=function(){
+//     if(document.readyState=='complete'){
+//        $('.spinner').fadeOut("fast");
+//        var historyVal = $('#address').html();
+//        var timer =   setInterval(function() {
+//        var curVal = $('#address').html();
+//        if (curVal !== historyVal) { // 检测到不相同
+//       	  $("#logo").fadeIn();
+//             clearInterval(timer);//中断定时器
+//        }
+//        }, 100);//0.5秒检测一次
+//     }
+//   }
+</script>
+
+  <script type="text/javascript" async>
+function GetQueryString(name)
+	{ 
+var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
+var r = window.location.search.substr(1).match(reg);
+if(r!=null)return  unescape(r[2]); return null; 
+  	} 
+  	
+function double(num){
+    if (num<10){
+        return "0"+num;   //如果时分秒少于10，则在前面加字符串0
+    }
+    else{
+ return ""+num;        //否则，直接返回原有数字
+}
+}
+</script> 
+<script type="text/javascript" async>
+$(document).ready(function(){
+   $('.signAll').click(function(){
+	   $(this).shake(2, 10, 400);
+   });
+   $('.logo').click(function(){
+	   $(this).shake(2, 10, 400);
+   });
+});
+</script>
+
+
+<meta charset="UTF-8">
+<title>打卡</title>
+<script async> 
+function disptime(today){
+// 	var today = new Date(); //获得当前时间
+// 	var hh = today.getHours();  //获得小时、分钟、秒
+// 	var mm = today.getMinutes();
+// 	var ss = today.getSeconds();
+// 	document.getElementById('time').innerHTML=double(hh)+":"+double(mm)+":"+double(ss);//小于10的前面补0
+// 	document.getElementById('time2').innerHTML=double(hh)+":"+double(mm)+":"+double(ss);//小于10的前面补0
+// 	 var myTime=setTimeout("disptime()",1000);//一秒钟一次
+	var hour = today.hours;
+	var minu = today.minutes;
+	var seco = today.seconds;
+	window.clearInterval(timer1);
+	timer1 = window.setInterval(doTime, 1000); 
+	function doTime(){
+	seco++;
+	if(seco==60){
+	minu+=1;
+	seco=0;
+	}
+	if(minu==60){
+	   hour+=1;
+	   minu=0;
+	}
+	if(hour==24){ 
+	hour=0;
+	}
+	document.getElementById("time").innerHTML=double(hour)+":"+double(minu)+":"+double(seco);
+	document.getElementById("time2").innerHTML=double(hour)+":"+double(minu)+":"+double(seco);
+	}
+}
+</script>
+
+</head>
+<!-- style=" background-repeat:no-repeat ; -->
+<body background="images/BGP1.jpg"style=background-size:100% >
+<div id="ifreamdiv"  class = "ifream" ></div>
+<div  id ="logo" class="logo"  onclick="refresh()" ><img src="images/logo.png" class="logoimg" ></div> 
+<div id="address"  class = "address" >
+</div>
+<div id = "signAll"  class ="signAll" onclick="sign()" style="display:none">
+
+<div id="time"  class = "time"></div> 
+<div id="sign" > 
+<p class ="daka">打卡</p>
+</div> 
+</div> 
+<div id = "outofRange"  class ="outOfRange"  style="display:none">
+
+<div id="time2"  class = "time"></div> 
+<div id="sign2" > 
+<p class ="daka">当前地点超过<br>打卡范围！</p>
+</div> 
+</div> 
+
+  <div id ="success"  style="display:none" class= "sucess"></div>
+  <div id="record"  class = "record"></div>
+	<div id="menu" class="menu">
+    <div id="default" class="subMenu" >
+        <img id="defaultImg" class="menu_img" data-imgname="signIn"/>
+    </div>
+    <div id="rili" class="subMenu">
+        <img id="riliImg" class="menu_img" data-imgname="calendar"/>
+    </div>
+    <div id="rule" class="subMenu">
+        <img id="ruleImg" class="menu_img" data-imgname="rule"/>
+    </div>
+</div>
+<!-- 规则显示区域 -->
+<div id = "ruleDiv"  class ="ruleDiv"  style="display:none">&nbsp;<div id ="rjs"  class = "card" onclick = "window.open('file/rjs.pdf');">
+<h3>
+	人民教育出版社有限公司
+</h3>
+<p>
+	<span class ="ruleLa">日期 <span class ="rule">周一至周五</span></span>
+</p>
+<p>
+	<span class ="ruleLa">时间 <span class ="rule">08:30-16:30</span></span>
+</p>
+<p>
+	<span class ="ruleLa">位置 <span class ="rule">社本部大楼200米以内</span></span>
+</p>
+<p>
+<div class = "cardLine"></div>
+</p>
+<p>
+<span>详情</span>
+</p>
+</div>
+<div class = "cardBeside"></div>
+<div id ="rjjczx"  class = "card"  onclick = "window.open('file/rjjczx.pdf');">
+<h3>
+	人教教材中心有限责任公司
+</h3>
+<p>
+	<span class ="ruleLa">日期 <span class ="rule">周一至周五</span></span>
+</p>
+<p>
+	<span class ="ruleLa">时间 <span class ="rule">08:30-16:30</span></span>
+</p>
+<p>
+	<span class ="ruleLa">位置 <span class ="rule">社本部大楼200米以内</span></span>
+</p>
+	<div class = "cardLine"></div>
+<p>
+<span>详情</span>
+</p>
+
+</div>
+<div class ="cardBeside"></div>
+<div id ="rjdys" class = "card"  onclick = "window.open('file/rjdys.pdf');">
+<h3>
+	人民教育电子音像出版社有限公司
+</h3>
+<p>
+	<span class ="ruleLa">日期 <span class ="rule">周一至周五</span></span>
+</p>
+<p>
+	<span class ="ruleLa">时间 <span class ="rule">08:30-16:30</span></span>
+</p>
+<p>
+	<span class ="ruleLa">位置 <span class ="rule">社本部大楼200米以内</span></span>
+</p>
+<div class = "cardLine"></div>
+<p>
+<span>详情</span>
+</p>
+
+</div>
+<div class = "cardBeside"></div>
+<!-- <div id ="rjsz"   class = "card"  onclick = "window.open('file/rjsz.pdf');"> -->
+<div id ="rjsz"   class = "card" >
+<h3>
+	人教数字出版有限公司
+</h3>
+<p>
+	<span class ="ruleLa">日期 <span class ="rule">周一至周五</span></span>
+</p>
+<p>
+	<span class ="ruleLa">时间 <span class ="rule">08:30-18:00间弹性工作</span></span>
+</p>
+<p>
+	<span class ="ruleLa">位置 <span class ="rule">北京国际200米以内</span></span>
+</p>
+<!-- <div class = "cardLine"></div> -->
+<!-- <p> -->
+<!-- <span>详情</span> -->
+<!-- </p> -->
+
+</div>
+<div class = "cardBeside"></div>
+<div id ="rjjz" class = "card"  >
+<h3>
+	北京人教聚珍图文技术有限公司
+</h3>
+<p>
+	<span class ="ruleLa">日期 <span class ="rule">周一至周五</span></span>
+</p>
+<p>
+	<span class ="ruleLa">时间 <span class ="rule">08:30-16:30</span></span>
+</p>
+<p>
+	<span class ="ruleLa">位置 <span class ="rule">社本部大楼200米以内</span></span>
+</p>
+</div>
+<div style="height:4rem;"></div>
+</div>
+<div id="calendar"  style="display:none"></div>
+<div id="recordsByday" class="recordsByday" style="display:none">
+</div>
+
+
+
+<!-- <!--   <div id="test"  onclick = "test()">单点测试</div> -->
+<!--   <script src="js/attendanceCalendar.js"></script> -->
+</body>
+</html>

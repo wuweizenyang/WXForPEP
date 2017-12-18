@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html>
+<meta charset="UTF-8">
+<meta http-equiv="Access-Control-Allow-Origin" content="*">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"> 
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+<head>
+<link rel="stylesheet" href="css/style.css?v=4.9" type="text/css" >
+  <script type="text/javascript">
+function getAddress(lat,lng)
+	{ 
+	$.ajax({  
+	 	type : "POST", 
+	    contentType : "application/json", 
+	    url : "./getAddressByTXServlet?lat="+lat+"&lng="+lng+"&flag=1", 
+	    dataType : 'json', 
+	    success : function(result) { 
+	    	var address = result.title;
+	    	document.getElementById('address').innerHTML=address; 
+	    },
+	    error : function(xhr, status, errMsg)
+        {
+             alert("获取地址信息失败!");
+        }
+}); 
+  	} 
+</script> 
+  <script type="text/javascript">
+// function test()
+// 	{ 
+// 	$.ajax({  
+// 		type : "POST", 
+// 		contentType : "application/json", 
+// 		url : "./getUserInfoByCodeServlet?code=" + GetQueryString("code"), 
+// 		dataType : 'json', 
+// 	    success : function(result) { 
+// 	    	var a = result.src;
+// 	    	alert(a);
+// 	   		 window.location.href= a;
+// 		 	return;
+// 	    },
+// 	    error : function(xhr, status, errMsg)
+//         {
+//              alert("传输失败!");
+//         }
+// }); 
+//   	} 
+</script> 
+<script type="text/javascript">
+      function refresh(){
+    	  //再次获取一下位置信息
+    	             wx.getLocation({
+	            	    type: 'wgs84', // 默认为wgs84的gps坐标，如果要返回直接给openLocation用的火星坐标，可传入'gcj02'
+	            	    success: function (res) {
+	            	        var lat = res.latitude; // 纬度，浮点数，范围为90 ~ -90
+	            	        var lng = res.longitude; // 经度，浮点数，范围为180 ~ -180。
+	            	        //先判断当前位置是否超过打卡范围
+	            	        getAddress(lat,lng);
+	            	        //还要刷新地图和下面的是否在范围内
+	            	        $.ajax({  
+	             	    	 	type : "POST", 
+	             	    	    contentType : "application/json", 
+	             	    	    url : "./SwitchZBServlet?lat=" +lat+"&lng="+lng, 
+	             	    	    dataType : 'json', 
+	             	    	    success : function(result) {
+	             	    	    	var latitude1 = result.lat;
+	             	    	    	var longitude1 = result.lng;
+	             	    	    	var iframe = document.getElementById("iframe");
+	             	      	       	iframe.src = "http://apis.map.qq.com/ws/staticmap/v2/?center="+latitude1+","+longitude1+"&zoom=16&markers=color:blue|label:A|"+latitude1+","+longitude1+"&key=3PHBZ-UBAR4-TMNU5-DSW62-ZHX72-T5BDW&size=400*180";
+	             	    	    },
+	             	    	    error : function(xhr, status, errMsg)
+	             	            {
+	             	                 alert("转换坐标失败!");
+	             	                 return;
+	             	            },
+	             	    }); 
+	            	        //判断距离是否超过限制,如果超过限制,显示outofRange DIV,否则显示SignAll DIV
+	            	    	$.ajax({  
+	            	    	 	type : "POST", 
+	            	    	    contentType : "application/json", 
+	            	    	    url : "./GetDistanceServlet?lat=" +latitude+"&lng="+longitude, 
+	            	    	    dataType : 'json', 
+	            	    	    success : function(result) { 
+	            	    	    	 var today1 = result.today;
+	            	    		     disptime(today1);
+	            	    	    	if(result.flag=='out'){
+	            	    	    	$("#outofRange").fadeIn();
+	            	    	    	document.getElementById("signAll").style.display="none";//隐藏
+	            	    	    	}else{
+	            	    	    		$("#signAll").fadeIn();
+	            	    	   	 		document.getElementById("outofRange").style.display="none";//隐藏
+	            	    	    	}
+	            	    	    },
+	            	    	    error : function(xhr, status, errMsg)
+	            	            {
+	            	                 alert("获取距离信息失败!");
+	            	                 return;
+	            	            },
+	            	    });
+	            	    },
+	            	    error: function(res){
+//	                         alert("有错误！");
+	            	    	 return;
+	         		},
+	         	    fail: function(res){
+//	                     alert("请打开定位服务并对企业微信开放定位！");
+	         	    	 return;
+	                    
+	     		},
+	         	    	cancel: function(res){
+//	                    	 alert("用户取消授权!");
+	         	    		 return;
+	     		}
+	            	});
+    	
+     }
+   </script>
+<script type="text/javascript">
+      function sign(){
+    	  //再次获取一下位置信息
+    	             wx.getLocation({
+	            	    type: 'wgs84', // 默认为wgs84的gps坐标，如果要返回直接给openLocation用的火星坐标，可传入'gcj02'
+	            	    success: function (res) {
+	            	        var lat = res.latitude; // 纬度，浮点数，范围为90 ~ -90
+	            	        var lng = res.longitude; // 经度，浮点数，范围为180 ~ -180。
+	            	        //先判断当前位置是否超过打卡范围
+	            	        getAddress(lat,lng);
+	            	    	$.ajax({  
+	            		 	type : "POST", 
+	            		    contentType : "application/json", 
+	            		    url : "./GetDistanceServlet?lat=" +lat+"&lng="+lng, 
+	            		    dataType : 'json', 
+	            		    success : function(result) { 
+	            				if(result.flag=="out"){
+	            					alert("您当前地点已经超过打卡范围！");
+	            					return;
+	            				}else{
+	            					var id = result.id; 
+	            					//在距离内,调用打卡Servlet
+	            					  $.ajax({  
+	            						 	type : "POST", 
+	            						    contentType : "application/json", 
+	            						    url : "./SignInServlet?cardNo="+cardNo+"&id="+id, 
+	            						    dataType : 'json', 
+	            						    success : function(result) { 
+	            								if(result.result=='success'){
+	            									  //执行后台Servlet,看打卡信息是否成功,如果返回成功那么则执行下面的代码
+	            							    	  document.getElementById("signAll").style.display="none";//隐藏
+	            							    	  document.getElementById("address").style.display="none";//隐藏
+	            							    	  document.getElementById("logo").style.display="none";//隐藏
+	            							    	  document.getElementById("ifreamdiv").style.display="none";//隐藏
+	            							    	  //显示打卡成功的DIV
+	            							    	 var div1 = document.getElementById("success");
+	            							    	 $("#success").slideDown("slow");
+	            							    	 //显示打卡记录
+	            							    	var data =  result.recordList;
+	            							    	var data2 = eval(data);
+	            							    	var html = "<table width='100%'> <tr><th class = 'rtime' align = 'left'>时间</th><th class = 'location' align = 'right'>方式</th></tr>";  
+	            							    	
+	            							        for(var i in data2)
+	            							  	 {
+	            							        	var obj = data2[i];
+	            							        	html= html+"<tr><td  align = 'left'>"+obj.entryDT+"</td><td align = 'right'>"+obj.signInName+"</td></tr>";  
+												 }
+	            							        html= html+"</table>";  
+	            							        document.getElementById("record").innerHTML=html;  
+	            								}else{
+	            									 alert("打卡失败，请稍后再试！");
+	            									 return;
+	            								}
+	            						    },
+	            						    error : function(xhr, status, errMsg)
+	            					        {
+	            					             alert("打卡失败!");
+	            					             return;
+	            					        }
+	            					});
+	            				}
+	            		    },
+	            		    error : function(xhr, status, errMsg)
+	            	        {
+	            	             alert("获取距离失败!");
+	            	             return;
+	            	        }
+	            	});
+	            	    },
+	            	    error: function(res){
+//	                         alert("有错误！");
+	            	    	 return;
+	         		},
+	         	    fail: function(res){
+//	                     alert("请打开定位服务并对企业微信开放定位！");
+	         	    	 return;
+	                    
+	     		},
+	         	    	cancel: function(res){
+//	                    	 alert("用户取消授权!");
+	         	    		 return;
+	     		}
+	            	});
+    	
+     }
+   </script>
+<!-- 判断是手机还是电脑 -->
+  <script type="text/javascript">
+function IsPC() {
+    var userAgentInfo = navigator.userAgent;
+    var Agents = ["Android", "iPhone",
+                "SymbianOS", "Windows Phone",
+                "iPad", "iPod"];
+    var flag = true;
+    for (var v = 0; v < Agents.length; v++) {
+        if (userAgentInfo.indexOf(Agents[v]) > 0) {
+            flag = false;
+            break;
+        }
+    }
+    return flag;
+}
+</script> 
+
+<script src = "http://map.qq.com/api/js?v=2.exp&key=NPABZ-G7LW4-DBLUP-XI2QT-4VCHE-UXFTD"></script>
+<script type="text/javascript" src="js/jweixin-1.2.0.js"></script>
+<script type="text/javascript" src="js/jquery-1.4.3.min.js"></script>
+<script type="text/javascript" src="js/jshaker.js"></script>
+
+   
+
+<script type="text/javascript" >
+var latitude;
+var longitude;
+var cardNo;
+var today;
+var timer1;
+window.onload=function(){
+	var flag = IsPC();
+	if(flag){
+// 		 window.location.href="PCError.html";
+// 		 return;
+	}
+	var  a = window.location.href;
+	$.ajax({ 
+	    type : "POST", 
+	    contentType : "application/json", 
+	    url : "./getSignatureServlet?url=" + a, 
+	    dataType : 'json', 
+	    success : function(result) { 
+	        var timestamp = result.timestamp; 
+	        var noncestr = result.noncestr; 
+	        var signature =result.signature;
+	        today = result.today;
+	        disptime(today);
+	        wx.config({  
+	        	beta: true,// 必须这么写，否则在微信插件有些jsapi会有问题
+	        	debug: false, //开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。  
+                appId: 'ww237859bf33ceef7f', //必填，公众号的唯一标识  
+                timestamp: timestamp, // 必填，生成签名的时间戳  
+                nonceStr: noncestr, //必填，生成签名的随机串 
+                signature: signature,// 必填，签名，见附录1  
+               
+                jsApiList: ['onMenuShareTimeline','onMenuShareAppMessage','onMenuShareQQ',  
+                            'onMenuShareWeibo','onMenuShareQZone','chooseImage',  
+                            'uploadImage','downloadImage','startRecord','stopRecord',  
+                            'onVoiceRecordEnd','playVoice','pauseVoice','stopVoice',  
+                            'translateVoice','openLocation','getLocation','hideOptionMenu',  
+                            'showOptionMenu','closeWindow','hideMenuItems','showMenuItems',  
+                            'showAllNonBaseMenuItem','hideAllNonBaseMenuItem'] //必填，需要使用的JS接口列表，所有JS接口列表 见附录2  
+            }); 
+	    } ,
+        error : function(xhr, status, errMsg)
+        {
+             alert("获取微信API失败!");
+             return;
+        }
+	}); 
+
+	wx.ready(function(){
+        // config信息验证后会执行ready方法，所有接口调用都必须在config接口获得结果之后，config是一个客户端的异步操作，所以如果需要在页面加载时就调用相关接口，则须把相关接口放在ready函数中调用来确保正确执行。对于用户触发时才调用的接口，则可以直接调用，不需要放在ready函数中。
+        wx.getLocation({
+    	    type: 'wgs84', // 默认为wgs84的gps坐标，如果要返回直接给openLocation用的火星坐标，可传入'gcj02'
+    	    success: function (res) {
+    	        latitude = res.latitude; // 纬度，浮点数，范围为90 ~ -90
+    	        longitude = res.longitude; // 经度，浮点数，范围为180 ~ -180。
+    	        var speed = res.speed; // 速度，以米/每秒计
+    	        var accuracy = res.accuracy; // 位置精度
+    	        getAddress(latitude,longitude);
+    	        //显示当前位置
+     	       $.ajax({  
+     	    	 	type : "POST", 
+     	    	    contentType : "application/json", 
+     	    	    url : "./SwitchZBServlet?lat=" +latitude+"&lng="+longitude, 
+     	    	    dataType : 'json', 
+     	    	    success : function(result) {
+     	    	    	var latitude1 = result.lat;
+     	    	    	var longitude1 = result.lng;
+     	    	    	var iframe = document.createElement("iframe");
+     	    	    	var div = document.getElementById("ifreamdiv");
+     	      	       	iframe.id ="iframe";
+     	      	       	iframe.src = "http://apis.map.qq.com/ws/staticmap/v2/?center="+latitude1+","+longitude1+"&zoom=16&markers=color:blue|label:A|"+latitude1+","+longitude1+"&key=3PHBZ-UBAR4-TMNU5-DSW62-ZHX72-T5BDW&size=400*180";
+     	      	       	iframe.style.width = "100%";
+     	      	       	iframe.style.height = "100%";
+     	      	     	iframe.class =""
+     	      	       	iframe.setAttribute('frameborder', 0);
+     	      	     	div.appendChild(iframe);
+     	    	    },
+     	    	    error : function(xhr, status, errMsg)
+     	            {
+     	                 alert("转换坐标失败!");
+     	                 return;
+     	            },
+     	    }); 
+    	        //判断距离是否超过限制,如果超过限制,显示outofRange DIV,否则显示SignAll DIV
+    	    	$.ajax({  
+    	    	 	type : "POST", 
+    	    	    contentType : "application/json", 
+    	    	    url : "./GetDistanceServlet?lat=" +latitude+"&lng="+longitude, 
+    	    	    dataType : 'json', 
+    	    	    success : function(result) { 
+    	    	    	if(result.flag=='out'){
+    	    	    	$("#outofRange").fadeIn();
+    	    	    	document.getElementById("signAll").style.display="none";//隐藏
+    	    	    	}else{
+    	    	    		$("#signAll").fadeIn();
+    	    	   	 		document.getElementById("outofRange").style.display="none";//隐藏
+    	    	    	}
+    	    	    },
+    	    	    error : function(xhr, status, errMsg)
+    	            {
+    	                 alert("获取距离失败!");
+    	                 return;
+    	            },
+    	    }); 
+    	    },
+    	    error: function(res){
+//                 alert("有错误！");
+    	    	 return;
+ 		},
+ 	    fail: function(res){
+//             alert("请打开定位服务并对企业微信开放定位！");
+ 	    	 return;
+            
+		},
+ 	    	cancel: function(res){
+//            	 alert("用户取消授权!");
+ 	    		 return;
+		}
+    	});
+  
+        
+    });
+$.ajax({  
+type : "POST", 
+contentType : "application/json", 
+url : "./getUserInfoByCodeServlet?code=" + GetQueryString("code"), 
+dataType : 'json', 
+success : function(result) { 
+if(result.CardNo==null){
+// 	 window.location.href="userInfoError.html";
+// 	 return;
+}else{
+	cardNo= result.CardNo;
+}
+},
+error : function(xhr, status, errMsg)
+{
+	
+ alert("获取用户信息失败!");
+ return;
+}
+}); 
+
+}
+
+</script>
+<script>
+// document.onreadystatechange=function(){
+//     if(document.readyState=='complete'){
+//        $('.spinner').fadeOut("fast");
+//        var historyVal = $('#address').html();
+//        var timer =   setInterval(function() {
+//        var curVal = $('#address').html();
+//        if (curVal !== historyVal) { // 检测到不相同
+//       	  $("#logo").fadeIn();
+//             clearInterval(timer);//中断定时器
+//        }
+//        }, 100);//0.5秒检测一次
+//     }
+//   }
+</script>
+
+  <script type="text/javascript">
+function GetQueryString(name)
+	{ 
+var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
+var r = window.location.search.substr(1).match(reg);
+if(r!=null)return  unescape(r[2]); return null; 
+  	} 
+  	
+function double(num){
+    if (num<10){
+        return "0"+num;   //如果时分秒少于10，则在前面加字符串0
+    }
+    else{
+ return ""+num;        //否则，直接返回原有数字
+}
+}
+</script> 
+<script type="text/javascript">
+$(document).ready(function(){
+   $('.signAll').click(function(){
+	   $(this).shake(2, 10, 400);
+   });
+   $('.logo').click(function(){
+	   $(this).shake(2, 10, 400);
+   });
+});
+</script>
+
+
+<meta charset="UTF-8">
+<title>打卡</title>
+<script> 
+function disptime(today){
+// 	var today = new Date(); //获得当前时间
+// 	var hh = today.getHours();  //获得小时、分钟、秒
+// 	var mm = today.getMinutes();
+// 	var ss = today.getSeconds();
+// 	document.getElementById('time').innerHTML=double(hh)+":"+double(mm)+":"+double(ss);//小于10的前面补0
+// 	document.getElementById('time2').innerHTML=double(hh)+":"+double(mm)+":"+double(ss);//小于10的前面补0
+// 	 var myTime=setTimeout("disptime()",1000);//一秒钟一次
+	var hour = today.hours;
+	var minu = today.minutes;
+	var seco = today.seconds;
+	window.clearInterval(timer1);
+	timer1 = window.setInterval(doTime, 1000); 
+	function doTime(){
+	seco++;
+	if(seco==60){
+	minu+=1;
+	seco=0;
+	}
+	if(minu==60){
+	   hour+=1;
+	   minu=0;
+	}
+	if(hour==24){ 
+	hour=0;
+	}
+	document.getElementById("time").innerHTML=double(hour)+":"+double(minu)+":"+double(seco);
+	document.getElementById("time2").innerHTML=double(hour)+":"+double(minu)+":"+double(seco);
+	}
+}
+</script>
+
+</head>
+
+<body background="images/BGP1.jpg"
+style=" background-repeat:no-repeat ;
+background-size:100% 100%; 
+background-attachment:fixed;">
+<!--  style="display:none" -->
+<div  id ="logo" class="logo"  onclick="refresh()" ><img src="images/logo.png"  width=125px height=115px ></div> 
+<div id="ifreamdiv"  class = "ifream"></div>
+<div id="address"  class = "address" >
+</div>
+<div id = "signAll"  class ="signAll" onclick="sign()" style="display:none">
+
+<div id="time"  class = "time"></div> 
+<div id="sign" > 
+<p class ="daka">打卡</p>
+</div> 
+</div> 
+<div id = "outofRange"  class ="outOfRange"  style="display:none">
+
+<div id="time2"  class = "time"></div> 
+<div id="sign2" > 
+<p class ="daka">当前地点超过<br>打卡范围！</p>
+</div> 
+</div> 
+ <div id="error"  style="display:none" > 
+<button   onclick="sclick()">位置不正确</button>
+ <script type="text/javascript">
+ 	function sclick(){  
+ 		//应该打开一个腾讯的地图然后把周围的POI列在上面,然后可以让用户选择
+ 		document.getElementById("sign").style.display="none";//隐藏
+   	 	document.getElementById("address").style.display="none";//隐藏
+   	  	document.getElementById("time").style.display="none";//隐藏
+   	var iframe = document.createElement("iframe");
+   	iframe.id ="iframe";
+   	iframe.src = 'http://apis.map.qq.com/tools/locpicker?search=1&policy=1&type=1&radius=1000&key=NPABZ-G7LW4-DBLUP-XI2QT-4VCHE-UXFTD&referer=myapp';
+   	iframe.style.width = "100%";
+   	iframe.style.height = "100%";
+   	iframe.setAttribute('frameborder', 0);
+   	document.body.appendChild(iframe);
+    	 window.addEventListener('message', function(event) {
+         // 接收位置信息，用户选择确认位置点后选点组件会触发该事件，回传用户的位置信息
+         var loc = event.data;
+         if (loc && loc.module == 'locationPicker') {//防止其他应用也会向该页面post信息，需判断module是否为'locationPicker'
+        	
+   	 	//把loc.poiaddress写入到address中
+   	 	var poiname =loc.poiname
+   	 	if(poiname == '我的位置'){
+   	 	$.ajax({  
+   		 	type : "POST", 
+   		    contentType : "application/json", 
+   		    url : "./getAddressByTXServlet?lat="+loc.latlng.lat+"&lng="+loc.latlng.lng+"&flag=5", 
+   		    dataType : 'json', 
+   		    success : function(result) { 
+   		 		document.getElementById('address').innerHTML=result.title;
+   		    },
+   		    error : function(xhr, status, errMsg)
+   	        {
+   	             alert("传输失败!");
+   	         	 return;
+   	        }
+   	}); 
+   		document.getElementById('address').innerHTML=poiname;
+   		document.body.removeChild(iframe);
+   		document.getElementById("sign").style.display="block";//显示
+	 		document.getElementById("address").style.display="block";//显示
+	  		document.getElementById("time").style.display="block";//显示
+   	 	}else{
+   	 		//判断距离是否超过1000米
+   	 	console.log(loc);
+   	 	$.ajax({  
+	 	type : "POST", 
+	    contentType : "application/json", 
+	    url : "./GetDistanceServlet?lat1=" + latitude+"&lng1="+longitude+"&lat2="+loc.latlng.lat+"&lng2="+loc.latlng.lng, 
+	    dataType : 'json', 
+	    success : function(result) { 
+	    	if(result.flag=='out'){
+	    	alert("您选择的地点已经超过打卡限制范围!");
+	    	document.getElementById("sign").style.display="none";//隐藏
+   	 		document.getElementById("address").style.display="none";//隐藏
+   	  		document.getElementById("time").style.display="none";//隐藏
+   	 		return;
+	    	}else{
+	    		document.getElementById('address').innerHTML=poiname;
+	       		document.body.removeChild(iframe);
+	       		document.getElementById("sign").style.display="block";//显示
+	   	 		document.getElementById("address").style.display="block";//显示
+	   	  		document.getElementById("time").style.display="block";//显示
+	    	}
+	    },
+	    error : function(xhr, status, errMsg)
+        {
+             alert("传输失败!");
+             return;
+        },
+}); 
+   	 	}
+         }                                
+     }, false); 
+ 	}  
+ 	</script>
+  </div> 
+  <div id ="success"  style="display:none" class= "sucess"></div>
+  <div id="record"  class = "record"></div>
+
+<!--   <div id="test"  onclick = "test()">单点测试</div> -->
+  
+</body>
+</html>
