@@ -17,7 +17,7 @@
     http://www.springframework.org/schema/aop/spring-aop.xsd  
     http://www.springframework.org/schema/util  
     http://www.springframework.org/schema/util/spring-util.xsd">  
-<context:component-scan base-package="com.rj.sign" use-default-filters="false">
+<context:component-scan base-package="com.rj.sign,com.rj.errorreport,com.rj.dfcx" use-default-filters="false">
         <context:include-filter type="annotation" expression="org.springframework.stereotype.Controller" />
         <context:include-filter type="annotation" expression="org.springframework.stereotype.Service" />
     </context:component-scan>

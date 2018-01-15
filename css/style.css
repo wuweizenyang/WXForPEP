@@ -108,16 +108,42 @@
 
 .rtime{
 	position: relative;
- 	font-family:"微软雅黑";
+ 	font-family:"宋体";
 /*  	text-align:left; */
-	 font-size:24px;
+	 font-size:18px;
 	 color:#6E5F45;
+}
+.rtime1{
+	position: relative;
+ 	font-family:"宋体";
+/*  	text-align:left; */
+	 font-size:18px;
+	 color:#6E5F45;
+}
+.td1{
+	color:#392c29;
+	font-size:18px;
 }
 .location{
 	position: relative;
- 	font-family:"微软雅黑";
-	 font-size:24px;
+ 	font-family:"宋体";
+	 font-size:18px;
 	 color:#6E5F45;
+}
+.title1{
+	position: relative;
+ 	font-family:"宋体";
+	text-align:left;
+	 font-size:18px;
+	 color:#6E5F45;
+	 font-weight:bold;
+	 align:left;
+}
+.errorRecord{
+	padding-left:1rem;
+}
+.recordsByday{
+	padding-left:1rem;
 }
 .ifream{
 	filter:alpha(opacity:30);
@@ -146,7 +172,6 @@
 	margin:0; 
     padding:0;
 }
-
 .card{
 	margin:1rem; 
     padding:1rem;

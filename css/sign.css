@@ -1,18 +1,38 @@
-.singer_r_img{display:block;width:114px;height:52px;line-height:45px;background:url(../images/sing_week.gif) right 2px no-repeat;vertical-align:middle;margin-bottom:-10px;text-decoration:none;}
+style.css.singer_r_img{display:block;width:114px;height:52px;line-height:45px;background:url(../images/sing_week.gif) right 2px no-repeat;vertical-align:middle;margin-bottom:-10px;text-decoration:none;}
 .singer_r_img:hover{background-position:right -53px;text-decoration:none;}
 .singer_r_img span{margin-left:14px;font-size:16px;font-family:'Hiragino Sans GB','Microsoft YaHei',sans-serif !important;font-weight:700;color:#165379;}
 .singer_r_img.current{background:url(images/sing_sing.gif) no-repeat 0 2px;border:0;text-decoration:none;}
 .sign table{border-collapse: collapse;border-spacing: 0;width:100%;  }
-.sign th,.sign td {width: 1rem;text-align: center;margin:0; padding:0;}
-.sign th {font-size: 16px;}
-.sign td{height:4rem;}
+.sign th,.sign td {text-align: center;margin:0; padding:0;}
+.sign th {font-size: 16px;color:#7ca2ce;}
 .table1{
 	border:0px;
-	margin-top:0.5rem;
+	margin-top:0rem;
 	padding-top:0px;
+	background-color:#4f77aa;
 }
-.sign td {color: #404040;vertical-align: middle;}      
-.sign .on {background: url(../images/sign_have.gif)no-repeat center;}
+.blank{
+	width:100%;
+	height:0.9rem;
+	background-color:#4f77aa;
+}
+.table1 th{
+	background-color:#4f77aa;
+}
+.table1 td{
+	margin-top:0rem;
+	width:3.5rem;
+	height:3.5rem;
+	border-radius:50%;
+}
+.ds{
+	background-color:#4f77aa;
+}
+/* .sign td {color: #404040;vertical-align: middle;}  */
+.sign .onWorkError {background: url(../images/sign_error.png)no-repeat center; color:white;background-color:#4f77aa;}
+.sign .onNotWorkError {background: url(../images/sign_error.png)no-repeat center; color:#7ca2ce;background-color:#4f77aa;}
+.sign .Work {color:white;background-color:#4f77aa;}
+.sign .notWork {color:#7ca2ce;background-color:#4f77aa;}
 /* .calendar_month_next,.calendar_month_prev{width: 34px;height: 40px;cursor: pointer;} */
 /* background:url(images/sign_arrow.png) no-repeat; */
 .calendar_month_next {
@@ -27,9 +47,10 @@
 	}
 .calendar_month_span { 
 	text-align: center;
-	font-size: 1.4rem;
-	color: #656565;
-	font-weight: bold;
+	font-size: 1.2rem;
+	color: white;
+	background-color:#4f77aa;
+/* 	font-weight: bold; */
 	 padding-top:0px;
 	 margin-top:0px;}
 .calendar_month_prev {

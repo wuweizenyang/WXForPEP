@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Access-Control-Allow-Origin" content="*">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"> 
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<link rel="stylesheet" href="css/styleErrorReport.css?v=1.1" type="text/css" >
+<link rel="stylesheet" href="css/jquery-confirm.min.css" type="text/css" >
+<script type="text/javascript" src="js/jweixin-1.2.0.js"></script>
+<script type="text/javascript" src="js/jquery-1.10.2.min.js"></script>
+<script type="text/javascript" src="js/jshaker.js"></script>
+<script type="text/javascript" src="js/jquery-confirm.min.js"></script>
+<script type="text/javascript">  
+function alert(titleStr,contentStr) {
+    $.alert({
+        title: titleStr,
+        content: contentStr,
+        buttons: {
+            ok: {
+                text: "确定",
+                btnClass: 'btn-primary',
+                keys: ['enter'],
+            }
+        }
+    });
+}
+</script>  
+<meta charset="UTF-8">
+<title>我的申请单</title>
+<script type="text/javascript" >
+var cardNo;
+var name;
+var departmentName;
+var score;
+var priority;
+var personName;
+var startTime;
+var reportList;
+var reStatus;
+var reStatusText;
+window.onload=function(){
+	var  a = window.location.href;
+	$.ajax({ 
+	    type : "POST", 
+	    contentType : "application/json", 
+	    url : "./InitializeMyErrorReportServlet?url=" + a, 
+	    dataType : 'json', 
+	    success : function(result) { 
+	    	reportList = result.reportList;
+	    	var isFQR = result.isFQR;
+	    	var data2 = eval(reportList);
+	    	if(isFQR=='X'){
+	    		//发起人不显示优先级
+	    			var html = "<table id ='table1' width='100%'> <tr><th class = 'thHeader' align = 'center'>单号</th><th class = 'thHeader' align = 'center'>申请人</th><th class = 'thHeader' align = 'center'>部门</th><th class = 'thHeader' align = 'center'>申请时间</th><th class = 'thHeader' align = 'center'>支持进度</th><th class = 'thHeader' align = 'center'>评分</th></tr>";  
+	        for(var i in data2)
+	  	 {
+	        	var obj = data2[i];
+	        	html= html+"<tr><td onclick='tdClick(this)' align = 'center' class='tdLineRepairId'>"+obj.repairId+"</td><td align = 'center' class='tdLine'>"+obj.userName+"</td><td align = 'center' class='tdLine'>"+obj.departmentDesc+"</td><td align = 'center' class='tdLine'>"+obj.startTime+"</td><td align = 'center' class='tdLine'>"+obj.reStatusText+"</td><td align = 'center' class='tdLine'>"+obj.scoreText+"</td></tr>";  
+		 }
+	    	}else{
+	    		var html = "<table id ='table1' width='100%'> <tr><th class = 'thHeader' align = 'center'>单号</th><th class = 'thHeader' align = 'center'>申请人</th><th class = 'thHeader' align = 'center'>部门</th><th class = 'thHeader' align = 'center'>申请时间</th><th class = 'thHeader' align = 'center'>支持进度</th><th class = 'thHeader' align = 'center' id ='thHeaderPro'>优先级</th><th class = 'thHeader' align = 'center'>评分</th></tr>";  
+		        for(var i in data2)
+		  	 {
+		        	var obj = data2[i];
+		        	html= html+"<tr><td onclick='tdClick(this)' align = 'center' class='tdLineRepairId'>"+obj.repairId+"</td><td align = 'center' class='tdLine'>"+obj.userName+"</td><td align = 'center' class='tdLine'>"+obj.departmentDesc+"</td><td align = 'center' class='tdLine'>"+obj.startTime+"</td><td align = 'center' class='tdLine'>"+obj.reStatusText+"</td><td align = 'center' class='tdLine'>"+obj.priority+"</td><td align = 'center' class='tdLine'>"+obj.scoreText+"</td></tr>";  
+			 }
+	    	}
+	    
+	        html= html+"</table>";  
+	        document.getElementById("myRepairInfoDiv").innerHTML=html;  
+	    },
+        error : function(xhr, status, errMsg)
+        {
+        	alert("提示","获取后台数据失败!")	
+             return;
+        }
+	
+}); 
+	//判断是不是发起人
+	
+	
+	 //添加图片
+    $("div .subMenu>img").each(function () {
+        var name = $(this).attr("data-imgname");
+        if(name=="myreport"){
+        	var src = "images/" + name + "_active.png"
+        	   //设置img的属性和值。
+            $(this).attr("src", src);
+        }else{
+        	 var src = "images/" + name + ".png"
+        	   //设置img的属性和值。
+             $(this).attr("src", src);
+        }
+    });
+    //点击事件
+    $("div.subMenu").click(function () {
+        var $img = $(this).children("img");
+        var name = $img.attr("data-imgname");
+        if(name=="new"){
+//         	激活图片,熄灭其他图片
+			$("#newReportImg").attr("src", "images/new_active.png");
+			$("#myReportImg").attr("src", "images/myreport.png");
+        	//跳转到另一个页面
+        	window.location.href='https://open.weixin.qq.com/connect/oauth2/authorize?appid=wwb27dcde4cb311a36&redirect_uri=http://wechat.pep.com.cn/WXForPEP/newErrorReport.html&response_type=code&scope=snsapi_base&agentid=1000017#wechat_redirect';
+        	return;
+        }
+    });
+}
+
+</script>
+<script type="text/javascript" >
+ function tdClick(obj){
+	 var repairId = $(obj).context.innerHTML;
+	 window.location.href='https://open.weixin.qq.com/connect/oauth2/authorize?appid=wwb27dcde4cb311a36&redirect_uri=http://wechat.pep.com.cn/WXForPEP/myRepairInfoDetail.html&response_type=code&scope=snsapi_base&agentid=1000017&state='+repairId+'#wechat_redirect';
+	 return;
+ }
+ </script>
+</head>
+<body background="images/BGP2.jpg"style=background-size:100%>
+	<div id ="myRepairInfoDiv"></div>
+		<br/>
+			<br/>
+				<br/>
+				<br/>
+			<br/>
+				<br/>
+	<div id="menu" class="menu">
+    <div id="newReport" class="subMenu" >
+        <img id="newReportImg" class="menu_img" data-imgname="new"/>
+    </div>
+    <div id="myreport" class="subMenu">
+        <img id="myReportImg" class="menu_img" data-imgname="myreport"/>
+    </div>
+</div>
+
+</body>
+</html>

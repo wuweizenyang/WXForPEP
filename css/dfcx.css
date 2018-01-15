@@ -1,0 +1,55 @@
+/* 以下两段CSS解决手机页面长按复制功能 */
+*{
+    -webkit-touch-callout:none;  /*系统默认菜单被禁用*/
+    -webkit-user-select:none; /*webkit浏览器*/
+    -khtml-user-select:none; /*早期浏览器*/
+    -moz-user-select:none;/*火狐*/
+    -ms-user-select:none; /*IE10*/
+    user-select:none;
+}
+input {
+     -webkit-user-select:auto; /*webkit浏览器*/
+}
+
+ label {
+  width: 120px;
+  font-size: 1.3rem;
+  display: inline-block;
+  text-align: left;
+  padding-left: 0.5rem;
+}
+select {
+  padding-left: 0px;
+  font-size: 1.3rem;
+  width:11rem;
+  font-size: 1.3rem;
+}
+    button{
+        font-family:"微软雅黑";
+        font-size: 1rem;
+        border-radius: 10%;
+        background-color:#6495ED;
+        color:#FFFFFF	
+        
+        }
+.dfje{
+	font-family:"微软雅黑";
+	 font-size: 1.5rem;
+	 padding-top: 3rem;
+}
+.signle{
+	 padding-top: 8rem;
+}
+
+
+     .ec_tip{
+         display:none;
+         padding:5px;
+         position: absolute; 
+         background: #555;
+         color:#fff;
+         border: 3px solid #555;
+         z-index: 9999; 
+     }
+
+ 

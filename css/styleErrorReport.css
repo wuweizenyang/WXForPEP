@@ -1,0 +1,180 @@
+@charset "utf-8";
+html{
+            height:100%;
+}
+ body
+        {
+            margin: 0px;
+            overflow:-Scroll;
+            overflow-y:hidden;
+
+        }
+@-webkit-keyframes rotateplane {
+  0% { -webkit-transform: perspective(120px) }
+  50% { -webkit-transform: perspective(120px) rotateY(180deg) }
+  100% { -webkit-transform: perspective(120px) rotateY(180deg)  rotateX(180deg) }
+}
+ 
+@keyframes rotateplane {
+  0% {
+    transform: perspective(120px) rotateX(0deg) rotateY(0deg);
+    -webkit-transform: perspective(120px) rotateX(0deg) rotateY(0deg)
+  } 50% {
+    transform: perspective(120px) rotateX(-180.1deg) rotateY(0deg);
+    -webkit-transform: perspective(120px) rotateX(-180.1deg) rotateY(0deg)
+  } 100% {
+    transform: perspective(120px) rotateX(-180deg) rotateY(-179.9deg);
+    -webkit-transform: perspective(120px) rotateX(-180deg) rotateY(-179.9deg);
+  }
+}
+/* 以下两段CSS解决手机页面长按复制功能 */
+/* *{ */
+/*     -webkit-touch-callout:none;  系统默认菜单被禁用 */
+/*     -webkit-user-select:none; webkit浏览器 */
+/*     -khtml-user-select:none; 早期浏览器 */
+/*     -moz-user-select:none;火狐 */
+/*     -ms-user-select:none; IE10 */
+/*     user-select:none; */
+/* } */
+/* input { */
+/*      -webkit-user-select:auto; webkit浏览器 */
+/* } */
+/* textarea{ */
+/* 	-webkit-user-select:auto; webkit浏览器 */
+/* } */
+* {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+    outline: none;
+}
+
+*:not(input,textarea) { 
+    -webkit-touch-callout: none; 
+    -webkit-user-select: none; 
+}
+.smallimage{
+	width:8.3rem;
+	height:8.3rem;
+/* 	padding:0.5rem; */
+}
+.thHeader{
+	text-align: center;
+	font-size: 1rem;
+	color: #656565;
+	font-weight: bold;
+	font-family:"微软雅黑";
+}
+.tdLine{
+		text-align: center;
+	    font-size: 0.9rem;
+	   font-family:"微软雅黑";
+	   color:#656565;
+}
+.editor-label {
+  margin: 0px 0 0 0;
+/*   height: 2rem; */
+ padding-top: 4rem;
+  display: inline-block;
+  width: 100%;
+/*   min-width: 300px; */
+  position: relative;
+}
+.editor-label label {
+  width: 120px;
+  font-size: 1.3rem;
+/*   line-height: 2rem; */
+  display: inline-block;
+  text-align: left;
+  padding-left: 0.5rem;
+}
+.editor-label input[type='text'],  .editor-box input[type='text'], .editor-box select {
+/*   height: 1.8rem; */
+
+  padding-left: 0px;
+  font-size: 1.3rem;
+/*   border-radius: 3px; */
+  width: 10rem;
+}
+.tdLineRepairId{
+		text-align: center;
+	    font-size: 0.9rem;
+	    font-family:"微软雅黑";
+	    text-decoration:underline;
+	    color:   #0033FF
+}
+.confirmTJ{
+	padding-left: 1rem;
+/* 	 border-radius: 5%; */
+}
+.starsDiv{
+	float:right;
+	padding-right: 25%;
+}
+.scoreDisplay{
+	float:right;
+}
+  .menu {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            height: 3.0rem;
+            background:url(../images/menu_bg.png)  repeat ; 
+          	 background-size:cover;
+          	 margin:0px; 
+          	 padding:0px;
+        }
+        .subMenu {
+            width: 50%;
+            float: left;
+/*             margin-left:5% */
+        }
+
+        img.menu_img {
+            width: 100%;
+            height: 3.0rem;
+        }
+
+        img {
+            vertical-align: center;
+            border: 0;
+        }
+        button{
+        	font-family:"微软雅黑";
+        	font-size: 1rem;
+        	border-radius: 10%;
+        	background-color:#6495ED;
+        	color:#FFFFFF	
+        
+        }
+.textarea{
+		font-size: 20px;
+        text-align:left;
+        width:13rem;
+        height:5rem;
+        
+        }
+ .select{
+/*  	height:2rem; */
+ 		width:11rem;
+ 		font-size: 1.3rem;
+ }
+    
+/* .evaluate{   */
+/*     width:100%;   */
+/* }   */
+/* #starts{   */
+/*     width:150px;   */
+/*     float:left;   */
+/* }   */
+/* #title{   */
+/*     width:200px;   */
+/*     float:left;   */
+/* }   */
+div,a,img {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select:none;
+}

@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html>
+<meta charset="UTF-8">
+<meta http-equiv="Access-Control-Allow-Origin" content="*">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"> 
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<head>
+<link rel="stylesheet" href="css/styleErrorReport.css?v=2.2" type="text/css" >
+<link rel="stylesheet" href="css/jquery-confirm.min.css" type="text/css" >
+<script type="text/javascript" src="js/jweixin-1.2.0.js"></script>
+<script type="text/javascript" src="js/jquery-1.10.2.min.js"></script>
+<script type="text/javascript" src="js/jshaker.js"></script>
+<script type="text/javascript" src="js/jquery.raty.js"></script>  
+<script type="text/javascript" src="js/jquery-confirm.min.js"></script>
+<script type="text/javascript">  
+function alert(titleStr,contentStr) {
+    $.alert({
+        title: titleStr,
+        content: contentStr,
+        buttons: {
+            ok: {
+                text: "确定",
+                btnClass: 'btn-primary',
+                keys: ['enter']
+            }
+        }
+    });
+}
+</script>  
+<script type="text/javascript">
+function confirm(content) {
+    $.confirm({
+        title: '提示！',
+        content: content,
+        buttons: {
+            ok: {
+                text: "确定",
+                btnClass: 'btn-primary',
+                keys: ['enter'],
+                action: function(){
+                	$("#resolved").attr("disabled", true);
+          		  var handleText = $("#processText").val();
+          		  $.ajax({
+                      type:"POST",
+                      url:"./ResolvedErrorReportServlet",
+                      scriptCharset: 'utf-8',
+                      data:{
+                    	  repairId:repairId,
+                    	  handleText:handleText,
+                    	  personId:cardNo,
+          		  	  personName:wxName,
+          		  	  doTime:doTime,
+                      },
+                     
+                      dataType:"json",
+                      success: function (result) {
+                       	var reslut1 = result.result;
+                       	if(reslut1=="S"){
+                       		alert("提示","操作成功!");
+                       	   $("#toNextPro").attr("disabled", true);
+                       	}
+                      },
+                      erro:function (){
+                      	alert("提示","提交失败,请联系管理员!");	
+                      }
+                  });
+
+                }
+            },
+            cancel: {
+                text: "取消",
+                btnClass: 'btn-primary',
+                keys: ['esc'],
+                action: function(){
+                	$("#resolved").attr("disabled", false);
+                }
+            }
+        }
+    });
+}
+</script>  
+<script type="text/javascript">
+function confirm1(content) {
+    $.confirm({
+        title: '提示！',
+        content: content,
+        buttons: {
+            ok: {
+                text: "确定",
+                btnClass: 'btn-primary',
+                keys: ['enter'],
+                action: function(){
+                	$("#resolved2").attr("disabled", true);
+          		  var handleText = $("#processText").val();
+          		  $.ajax({
+                      type:"POST",
+                      url:"./Resolved2ErrorReportServlet",
+                      scriptCharset: 'utf-8',
+                      data:{
+                    	  repairId:repairId,
+                    	  handleText:handleText,
+                    	  personId:cardNo,
+          		  	  	  personName:wxName,
+          		  	      doTime:doTime,
+                      },
+                      dataType:"json",
+                      success: function (result) {
+                       	var reslut1 = result.result;
+                       	if(reslut1=="S"){
+                       		alert("提示","操作成功!");
+                       	   $("#toNextPro").attr("disabled", true);
+                       	}
+                      },
+                      erro:function (){
+                      	alert("提示","提交失败,请联系管理员!");	
+                      }
+                  });
+
+                }
+            },
+            cancel: {
+                text: "取消",
+                btnClass: 'btn-primary',
+                keys: ['esc'],
+                action: function(){
+                	$("#resolved2").attr("disabled", false);
+                }
+            }
+        }
+    });
+}
+</script> 
+<meta charset="UTF-8">
+<title>申请单</title>
+<script type="text/javascript" >
+var repairId;
+var cardNo;
+var mobile;
+var name;
+var departmentIndex;
+var departmentName;
+var questionType;
+var questionDesc;
+var memberList;
+var questionList;
+var userId;
+var imagesList;
+var priority;
+var status;
+var score;
+var isDispenser;
+var isFQR;
+var processText;
+var wxName;
+var doTime;
+var isProcesser;
+window.onload=function(){
+	var  a = window.location.href;
+	$.ajax({ 
+	    type : "POST", 
+	    url: "./ErrorReportDetailServlet", 
+	    scriptCharset: 'utf-8',
+	    data:{
+	       uri:a,
+	    },
+	    dataType : 'json', 
+	    success : function(result) { 
+	        var timestamp = result.timestamp; 
+	        var noncestr = result.noncestr; 
+	        var signature =result.signature;
+	        cardNo = result.CardNo;
+	        userId = result.userId;
+			mobile = result.mobile;
+			name = result.name;
+			questionDesc = result.questionDesc;
+			questionType = result.questionType;
+			repairId =result.repairId;
+			priority = result.priority;
+			status = result.status;
+			score= result.score;
+			wxName =result.wxName;
+			isDispenser = result.isDispenser;
+			isFQR = result.isFQR;
+			isProcesser = result.isProcesser;
+			doTime = result.doTime;
+			processText = result.processText;
+			departmentIndex=result.departmentIndex;
+			departmentName=result.departmentName;
+			memberList = result.memberList;
+			questionList = result.questionList;
+			imagesList = result.imagesList;
+			//把报修人 部门 联系方式分别赋值
+			document.getElementById("BXR").value=name;  
+			document.getElementById("REPAIRID").value=repairId;  
+			document.getElementById("BM").value=departmentName;
+			document.getElementById("TEL").value=mobile;
+			document.getElementById("QUESTIONDESC").value=questionDesc;
+		
+			 if (priority != null && priority != undefined && priority != '') { 
+				 document.getElementById("PRIORITY").value=priority;//优先级
+			 }
+			 if (processText != null && processText != undefined && processText != '') { 
+				 document.getElementById("processText").value=processText;
+			 }
+			 var data2 = eval(questionList);
+		        for(var i in data2)
+			  	 {
+			        var obj = data2[i];
+			        $("#QUESTIONTYPE").append(  //此处向select中循环绑定数据
+			       	 "<option value="+obj.questionType+">" + obj.questionDesc+ "</option>");
+				 }
+		        $("#QUESTIONTYPE").val(questionType);
+		        var data1 = eval(memberList);
+		        for(var i in data1)
+			  	 {
+			        	var obj = data1[i];
+			        	$("#NEXTPRO").append(  //此处向select中循环绑定数据
+			       	    "<option value="+obj.userid+">" + obj.name+ "</option>");
+				 }
+			//控制哪些控件显示不显示可点不可点
+			//1.状态是E完成的已完成按钮不可见,提交给下个节点按钮不可见,优先级不可选,
+			//下个节点处理人DIV不可见,如果是发起人点击进入,如果有评分那么显示评分,
+			//如果没有的话则评分区域出现并可选
+			//2.状态是发起的时候如果是发起人进入,优先级显示不可编辑,下一节点处理人不显示,评分区域不显示
+			//如果是第二个节点进入,那么优先级出现可编辑,下一节点出现可编辑,下一节点和已解决按钮出现
+			//如果是其他节点进入,优先级出现不可编辑,下一节点出现可编辑,下一节点和已解决按钮出现
+			if(status=='A'){
+	    		//发起状态
+	    		   document.getElementById("confirmScore").style.display="none";
+	    		   document.getElementById("resolved2").style.display="none";
+	    		   document.getElementById("scoreDiv").style.display="none";
+	    		if(isFQR=='X'){
+	    			  $("#PRIORITY").attr("disabled", true);
+	    			  document.getElementById("nextProDiv").style.display="none";
+	    			  document.getElementById("toNextPro").style.display="none";
+	    			  document.getElementById("resolved").style.display="display";
+	    			  document.getElementById("remind").style.display="display";//提醒按钮显示
+	    		}else if(isDispenser=='X'){
+	    			 $("#NEXTPRO").attr("disabled", false);
+	    			 $("#PRIORITY").attr("disabled", false);
+	    			 document.getElementById("nextProDiv").style.display="display";
+	    			 document.getElementById("toNextPro").style.display="display";
+	    			  document.getElementById("resolved").style.display="display";
+	    			  document.getElementById("remind").style.display="none";//提醒按钮显示
+	    		}else if(isProcesser ==''){
+					//不是处理人所有按钮隐藏
+					document.getElementById("remind").style.display="none";//提醒按钮隐藏
+					document.getElementById("resolved2").style.display="none";//提醒按钮隐藏
+		    		  $("#PRIORITY").attr("disabled", true);
+		    		  document.getElementById("scoreDiv").style.display="none";
+		    		  document.getElementById("priorityDiv").style.display="display";
+		    		  document.getElementById("toNextPro").style.display="none";
+	  			  	 document.getElementById("resolved").style.display="none";
+	  			  	 document.getElementById("nextProDiv").style.display="none";
+				}else if(isProcesser =='X'){
+					  $("#PRIORITY").attr("disabled", true);
+					  document.getElementById("toNextPro").style.display="display";
+		  			  	 document.getElementById("resolved").style.display="display";
+		  			  	 document.getElementById("nextProDiv").style.display="display";
+				}
+	    	}else if(status=='E'){
+	    		//已完成状态
+	    		 document.getElementById("remind").style.display="none";//提醒按钮隐藏
+	    		  $("#PRIORITY").attr("disabled", true);
+	    		  document.getElementById("scoreDiv").style.display="display";
+	    		  document.getElementById("toNextPro").style.display="none";
+    			  document.getElementById("resolved").style.display="none";
+    			  document.getElementById("nextProDiv").style.display="none";
+    			  document.getElementById("confirmScore").style.display="none";//提交分数
+    				if(isFQR=='X'){
+    					document.getElementById("resolved2").style.display="none";//提醒按钮隐藏
+    				}else if(isProcesser =='X'){
+    					document.getElementById("resolved2").style.display="display";//提醒按钮显示
+    					if(score==0){
+    						//不显示评分
+    						document.getElementById("scoreDiv").style.display="none";
+    					}else{
+    						//评分不可编辑
+    						$("#starts").raty({ 
+    							readOnly: true,
+    							score: score, 
+    							path:'images',
+    							});
+    					}
+    				}else if(isProcesser ==''){
+    					//不是处理人所有按钮隐藏
+    					document.getElementById("remind").style.display="none";//提醒按钮隐藏
+    					document.getElementById("resolved2").style.display="none";//提醒按钮隐藏
+    		    		  $("#PRIORITY").attr("disabled", true);
+    		    		  document.getElementById("scoreDiv").style.display="none";
+    		    		  ocument.getElementById("PRIORITY").style.display="display";
+    		    		  document.getElementById("toNextPro").style.display="none";
+    	  			  	 document.getElementById("resolved").style.display="none";
+    	  			  	 document.getElementById("nextProDiv").style.display="none";
+    				}
+	    	}else if(status=='F'){
+	    		//已结束状态
+	    		document.getElementById("remind").style.display="none";//提醒按钮隐藏
+	    		document.getElementById("resolved2").style.display="none";
+	    		  $("#PRIORITY").attr("disabled", true);
+	    		  document.getElementById("scoreDiv").style.display="display";
+	    		  document.getElementById("toNextPro").style.display="none";
+  			  	 document.getElementById("resolved").style.display="none";
+  			  	 document.getElementById("nextProDiv").style.display="none";
+  				if(isFQR=='X'){
+  					//发起人并且评分为0
+  					if(score==0){
+  						//评分区域可编辑
+  						   $("#starts").raty({  
+  						        number:5,//星星个数  
+  						        path:'images',//图片路径  
+  						        target:'#title',//  
+  						        cancelHint:   'Cancel this rating!',
+  						        hints:['1分','2分','3分','4分','5分'],  
+  						        click: function(score1, evt) {  
+											score =score1;
+											 document.getElementById("scoreDisplay").innerText=score+"分";
+  						        }  
+  						    }); 
+  						 document.getElementById("confirmScore").style.display="display";//提交分数
+  					}else{
+  						//评分区域不可编辑
+  						$("#starts").raty({ 
+  							readOnly: true,
+  							score: score, 
+  							path:'images',
+  							});
+  						   document.getElementById("confirmScore").style="display:none;";
+  					}
+  				}else{
+  					 document.getElementById("confirmScore").style.display="none";//提醒按钮显示
+  					if(score==0){
+  						//不显示评分
+  						document.getElementById("scoreDiv").style.display="none";
+  					}else{
+  						//评分不可编辑
+  						$("#starts").raty({ 
+  							readOnly: true,
+  							score: score, 
+  							path:'images',
+  							});
+  					}
+  				}
+	    	}
+			
+	        if(imagesList!= null && imagesList != undefined && imagesList != ''){
+	        	var data3 = eval(imagesList);
+	        	 for(var i in data3)
+			  	 {
+			        var obj = data3[i];
+			        $("#imgdiv").append("<img   class =\"smallimage\" src=\""+obj.imgUrl+"\" />");
+				 }
+		        //将缩略图和查看大图结合在一起
+			    $(function(){  
+			        $(".smallimage").click(function(){  
+			            var _this = $(this);//将当前的smallimage元素作为_this传入函数  
+			            imgShow("#outerdiv", "#innerdiv", "#bigimg", _this);  
+			        });  
+			    });  
+
+			    function imgShow(outerdiv, innerdiv, bigimg, _this){  
+			        var src = _this.attr("src");//获取当前点击的smallimage元素中的src属性  
+			        $(bigimg).attr("src", src);//设置#bigimg元素的src属性  
+			            /*获取当前点击图片的真实大小，并显示弹出层及大图*/  
+			        $("<img/>").attr("src", src).load(function(){  
+			            var windowW = $(window).width();//获取当前窗口宽度  
+			            var windowH = $(window).height();//获取当前窗口高度  
+			            var realWidth = this.width;//获取图片真实宽度  
+			            var realHeight = this.height;//获取图片真实高度  
+			            var imgWidth, imgHeight;  
+			            var scale = 0.98;//缩放尺寸，当图片真实宽度和高度大于窗口宽度和高度时进行缩放  
+			            if(realHeight>windowH*scale) {//判断图片高度  
+			                imgHeight = windowH*scale;//如大于窗口高度，图片高度进行缩放  
+			                imgWidth = imgHeight/realHeight*realWidth;//等比例缩放宽度  
+			                if(imgWidth>windowW*scale) {//如宽度扔大于窗口宽度  
+			                    imgWidth = windowW*scale;//再对宽度进行缩放  
+			                }  
+			            } else if(realWidth>windowW*scale) {//如图片高度合适，判断图片宽度  
+			                imgWidth = windowW*scale;//如大于窗口宽度，图片宽度进行缩放  
+			                            imgHeight = imgWidth/realWidth*realHeight;//等比例缩放高度  
+			            } else {//如果图片真实高度和宽度都符合要求，高宽不变  
+			                imgWidth = realWidth;  
+			                imgHeight = realHeight;  
+			            }  
+			            $(bigimg).css("width",imgWidth);//以最终的宽度对图片缩放  
+			              
+			            var w = (windowW-imgWidth)/2;//计算图片与窗口左边距  
+			            var h = (windowH-imgHeight)/2;//计算图片与窗口上边距  
+			            $(innerdiv).css({"top":h, "left":w});//设置#innerdiv的top和left属性  
+			            $(outerdiv).fadeIn("fast");//淡入显示#outerdiv及.pimg  
+			        });  
+			        $(outerdiv).click(function(){//再次点击淡出消失弹出层  
+			            $(this).fadeOut("fast");  
+			        });  
+			    }  
+			//添加图片的row
+			function addImg(src){
+			  var col=$('<div />');
+			  col.addClass('col-xs-6 col-md-3');
+			  var a=$('<a />');
+			  a.addClass('thumbnail');
+			  var img=$('<img />');
+			  img.attr('src',src);
+			  a.append(img).append(src);
+			  col.append(a);
+			  $('.row').append(col);
+			}
+		       
+	        }
+	    	
+	            //添加图片
+// 	            $("div .subMenu>img").each(function () {
+// 	                var name = $(this).attr("data-imgname");
+// 	                if(name=="new"){
+// 	                	var src = "images/" + name + "_active.png"
+// 	                	   //设置img的属性和值。
+// 		                $(this).attr("src", src);
+// 	                }else{
+// 	                	 var src = "images/" + name + ".png"
+// 	                	   //设置img的属性和值。
+// 	 	                $(this).attr("src", src);
+// 	                }
+// 	            });
+// 	            //点击事件
+// 	            $("div.subMenu").click(function () {
+// 	                var $img = $(this).children("img");
+// 	                var name = $img.attr("data-imgname");
+// 	                if(name=="myreport"){
+// // 	                	激活图片,熄灭其他图片
+// 						$("#newReportImg").attr("src", "images/new.png");
+// 						$("#myreportImg").attr("src", "images/myreport_active.png");
+// 	                	//跳转到另一个页面
+// 	                	window.location.href='myRepairInfo.html';
+// 	                	return;
+// 	                }
+// 	            });
+// 	        wx.config({  
+// 	        	beta: true,// 必须这么写，否则在微信插件有些jsapi会有问题
+// 	        	debug: false, //开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。  
+//                 appId: 'ww237859bf33ceef7f', //必填，公众号的唯一标识  
+//                 timestamp: timestamp, // 必填，生成签名的时间戳  
+//                 nonceStr: noncestr, //必填，生成签名的随机串 
+//                 signature: signature,// 必填，签名，见附录1  
+//                 jsApiList: ['onMenuShareTimeline','onMenuShareAppMessage','onMenuShareQQ',  
+//                             'onMenuShareWeibo','onMenuShareQZone','chooseImage',  
+//                             'uploadImage','downloadImage','startRecord','stopRecord',  
+//                             'onVoiceRecordEnd','playVoice','pauseVoice','stopVoice',  
+//                             'translateVoice','openLocation','getLocation','hideOptionMenu',  
+//                             'showOptionMenu','closeWindow','hideMenuItems','showMenuItems',  
+//                             'showAllNonBaseMenuItem','hideAllNonBaseMenuItem'] //必填，需要使用的JS接口列表，所有JS接口列表 见附录2  
+//             }); 
+	        
+	    } ,
+        error : function(xhr, status, errMsg)
+        {
+        	alert("提示","获取企业微信API失败!");
+             return;
+        }
+	}); 
+
+}
+</script>
+<script type="text/javascript">
+function isresolved(){
+	confirm1("请确定该技术支持单已解决吗?");
+}
+
+</script>
+<script type="text/javascript">
+//确定发表提问  获得用户发表的内容
+function hasresolved(){
+// 	var con;
+	confirm("请确定该技术支持单已处理完吗?");
+// 	if(con==true){
+// 		$("#resolved").attr("disabled", true);
+// 		  var handleText = $("#processText").val();
+// 		  $.ajax({
+//             type:"POST",
+//             url:"./ResolvedErrorReportServlet",
+//             scriptCharset: 'utf-8',
+//             data:{
+//           	  repairId:repairId,
+//           	  handleText:handleText,
+//           	  personId:cardNo,
+// 		  	  personName:wxName,
+// 		  	  doTime:doTime,
+//             },
+           
+//             dataType:"json",
+//             success: function (result) {
+//              	var reslut1 = result.result;
+//              	if(reslut1=="S"){
+//              		alert("提示","操作成功!");
+//              	   $("#toNextPro").attr("disabled", true);
+//              	}
+//             },
+//             erro:function (){
+//             	alert("提示","提交失败,请联系管理员!");	
+//             }
+//         });
+// 	}else{
+// 		$("#resolved").attr("disabled", false);
+// 	}
+};
+</script>
+<script type="text/javascript">
+function onConfirmScore(){
+	if(score==0){
+		alert("提示","评分不能为空!");	
+		return;
+	}
+	 $.ajax({
+         type:"POST",
+         url:"./ConfirmScoreServlet",
+         scriptCharset: 'utf-8',
+         data:{
+       	  repairId:repairId,
+       	  score:score
+         },
+         dataType:"json",
+         success: function (result) {
+          	var reslut1 = result.result;
+//           	alert(reslut1);
+          	if(reslut1=="S"){
+          		alert("提示","评分提交成功!");	
+
+          		document.getElementById("confirmScore").style.display="none";
+          		$("#starts").raty({ 
+					readOnly: true,
+					score: score, 
+					path:'images',
+					});
+          	}
+         },
+         erro:function (){
+        	 alert("提示","提交失败请联系管理员!");	
+         }
+     });
+};
+</script>
+<script type="text/javascript">
+function onToNextPro(){
+	var newPerson = $("#NEXTPRO").val();
+	 if (newPerson == null || newPerson == undefined || newPerson == '-1') { 
+		 alert("提示","下一节点处理人不能为空!");	
+		return;
+	}
+	 var personText =$("#NEXTPRO").find("option:selected").text();
+	$("#NEXTPRO").attr("disabled", true);
+	 $.ajax({
+         type:"POST",
+         url:"./ToNextProServlet",
+         scriptCharset: 'utf-8',
+         data:{
+       	  repairId:repairId,
+       	  personId:newPerson,
+       	  personName:personText
+         },
+         dataType:"json",
+         success: function (result) {
+          	var reslut1 = result.result;
+          	if(reslut1=="S"){
+          		alert("提示","转交给下一节点成功!");	
+          		document.getElementById("resolved").style.display="none";
+          		document.getElementById("toNextPro").style.display="none";
+          	
+          	}
+         },
+         erro:function (){
+        	 alert("提示","评提交失败请联系管理员!");	
+         }
+     });
+};
+</script>
+<script type="text/javascript">
+function onRemind(){
+	$("#remind").attr("disabled", true);
+	 $.ajax({
+         type:"POST",
+         url:"./RemindServlet",
+         scriptCharset: 'utf-8',
+         data:{
+       	  repairId:repairId,
+       	  userName:wxName,
+         },
+         dataType:"json",
+         success: function (result) {
+          	var reslut1 = result.result;
+          	if(reslut1=="S"){
+          		alert("提示","提醒成功!");	
+          		document.getElementById("resolved").style.display="none";
+          		document.getElementById("toNextPro").style.display="none";
+          		document.getElementById("remind").style.display="none";
+          	
+          	}
+         },
+         erro:function (){
+        	 alert("提示","提交失败请联系管理员!");	
+         }
+     });
+};
+</script>
+<script type="text/javascript" async>
+$(document).ready(function(){
+   $('#toNextPro').click(function(){
+	   $(this).shake(2, 10, 400);
+   });
+   $('#remind').click(function(){
+	   $(this).shake(2, 10, 400);
+   });
+   $('#resolved').click(function(){
+	   $(this).shake(2, 10, 400);
+   });
+   $('#resolved2').click(function(){
+	   $(this).shake(2, 10, 400);
+   });
+   $('#confirmScore').click(function(){
+	   $(this).shake(2, 10, 400);
+   });
+});
+</script>
+</head>
+<body background="images/BGP2.jpg"style=background-size:100%>
+<div class="editor-label" >
+		<label for="REPAIRID">运维单号</label>
+		<input type="text" name="REPAIRID" id="REPAIRID"  disabled />
+		<br />
+		<label for="BXR">申请人</label>
+		<input type="text" name="BXR" id="BXR"  disabled />
+		<br />
+		<label for="BM">部门</label>
+		<input type="text" name="BM" id="BM"  disabled />
+		<br />
+		<label for="TEL">联系电话</label>
+		<input type="text" name="TEL" id="TEL" disabled />
+		<br />
+		<label for="QUESTIONTYPE">问题类型</label>
+		<select id="QUESTIONTYPE" class ="select" disabled >
+		</select>
+		<br />
+		<label for="QUESTIONDESC">问题描述</label>
+<!-- 		<input type="text" name="QUESTIONDESC" id="QUESTIONDESC"  style="width:13rem" disabled /> -->
+		<textarea   name="QUESTIONDESC"  id="QUESTIONDESC"  class="textarea" disabled></textarea>
+		<br />
+		<div id ="priorityDiv" >
+		<label for="PRIORITY">优先级</label>
+		<select id="PRIORITY"  class ="select" >
+			<option value="2">中</option>
+			<option value="1">低</option>
+			<option value="3">高</option>
+		</select>
+		<br/>
+		</div>
+		<div id ="processTextDiv" >
+		<label for="processText">处理备注</label>
+		<input type="text" name="processText" id="processText"  style="width:13rem" />
+		<br/>
+		</div>
+	<!-- 选择给下个节点的人 -->
+		<div id ="nextProDiv" style="display:none">
+			<label for="NEXTPRO">下一节点处理人</label>
+			<select id="NEXTPRO"  class ="select" >
+			<option value="-1">如没有可不选</option>
+			</select>
+		<br/>
+		</div>
+		<br/>
+		<div id ="imgdiv">
+		</div>
+		<div id="outerdiv" style="position:fixed;top:0;left:0;background:rgba(0,0,0,0.7);z-index:2;width:100%;height:100%;display:none;">
+   	    <div id="innerdiv" style="position:absolute;">
+        <img id="bigimg" style="border:5px solid #fff;" src="" />
+    </div>
+</div> 
+	<br/>
+   	<div id ="scoreDiv">
+   	<label for="starts">评分</label> <div id="starts" class ="starsDiv"></div>
+   <input type="hidden"  id="title">
+	</div>  
+	<br/>
+	<button  type="button" id = "toNextPro" onclick ="onToNextPro()" >分配给下个节点</button>
+	<button  type="button" id = "remind" onclick ="onRemind()">再次提醒</button>
+	<button  type="button" id = "resolved" onclick ="hasresolved()" >已处理完成</button>
+	<button  type="button" id = "resolved2" onclick ="isresolved()">已解决</button>
+	<br/>
+	<button  type="button" id = "confirmScore" onclick ="onConfirmScore()">提交评分</button>
+	<br/>
+</div>
+
+</body>
+</html>

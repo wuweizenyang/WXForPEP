@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Access-Control-Allow-Origin" content="*">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"> 
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta charset="UTF-8">
+<link rel="stylesheet" href="css/dfcx.css?v=1.2" type="text/css" >
+<link rel="stylesheet" href="css/jquery-confirm.min.css" type="text/css" >
+<script type="text/javascript" src="js/jweixin-1.2.0.js"></script>
+<script type="text/javascript" src="js/jquery-1.10.2.min.js"></script>
+<script type="text/javascript" src="js/jshaker.js"></script>
+<script type="text/javascript" src="js/jquery-confirm.min.js"></script>
+<title>党费查询</title>
+<script>
+
+</script>
+<script type="text/javascript" async>
+$(document).ready(function(){
+   $('#cxdfBut').click(function(){
+	   $(this).shake(2, 10, 400);
+   });
+});
+</script>
+<script type="text/javascript" >
+function onCxdf(){
+	year = $("#YEAR").val();
+	month = $("#MONTH").val();
+	$.ajax({
+        type:"POST",
+        url:"./CXDFServlet",
+        scriptCharset: 'utf-8',
+        data:{
+        	pernr:pernr,
+      	    year:year,
+      	    month:month
+        },
+        dataType:"json",
+        success: function (result) {
+        	 type =result.type;
+        	 msg = result.msg;
+        	 dfje = result.dfje;
+        	 document.getElementById("YEAR").value=year;  
+        	 document.getElementById("MONTH").value=month;
+        	 if(type=='X'){
+        		 document.getElementById("dfjeDiv").innerHTML=msg;  
+        	 }else{
+        		 document.getElementById("dfjeDiv").innerHTML='您在'+year+'年'+month+'月'+'应缴党费金额为'+dfje+"元";  
+        	 }
+         	},
+            erro:function (){
+                alert('提交失败,请联系管理员');
+            }
+    });
+}
+</script>
+<script type="text/javascript" >
+var year;
+var month;
+var pernr;
+var type;
+var msg;
+var dfje;
+window.onload=function(){
+	var  a = window.location.href;
+	 $.ajax({
+         type:"POST",
+         url:"./InitDfcxServlet?url="+a,
+         scriptCharset: 'utf-8',
+         dataType:"json",
+         success: function (result) {
+        	 pernr = result.pernr;
+        	 year = result.year;
+        	 month =result.month;
+        	 type =result.type;
+        	 msg = result.msg;
+        	 dfje = result.dfje;
+        	 document.getElementById("YEAR").value=year;  
+        	 document.getElementById("MONTH").value=month;
+        	 if(type=='X'){
+        		 document.getElementById("dfjeDiv").innerHTML=msg;  
+        	 }else{
+        		 document.getElementById("dfjeDiv").innerHTML='您在'+year+'年'+month+'月'+'应缴党费金额为'+dfje+"元";  
+        	 }
+         },
+         erro:function (){
+             alert('提交失败,请联系管理员');
+         }
+     });
+}
+</script>
+</head>
+<body background="images/BGP2.jpg"style=background-size:100%>
+	    <div id = "signle" class ="signle">
+		<label for="YEAR">年度</label>
+		<select id="YEAR" class ="select">
+		<option value="2018">2018年</option>
+		<option value="2019">2019年</option>
+		<option value="2020">2020年</option>
+		<option value="2021">2021年</option>
+		<option value="2022">2022年</option>
+		<option value="2021">2023年</option>
+		<option value="2022">2024年</option>
+		<option value="2021">2025年</option>
+		<option value="2022">2026年</option>
+		<option value="2021">2027年</option>
+		<option value="2022">2028年</option>
+		</select>
+		<br />
+		<label for="MONTH">月份</label>
+		<select id="MONTH" class ="select">
+		<option value="1">1月</option>
+		<option value="2">2月</option>
+		<option value="3">3月</option>
+		<option value="4">4月</option>
+		<option value="5">5月</option>
+		<option value="6">6月</option>
+		<option value="7">7月</option>
+		<option value="8">8月</option>
+		<option value="9">9月</option>
+		<option value="10">10月</option>
+		<option value="11">11月</option>
+		<option value="12">12月</option>
+		</select>
+		<br/>
+		<br/>
+		<br/>
+		<button id="cxdfBut" onclick="onCxdf()">查询党费</button>
+		<div id="dfjeDiv" class ="dfje"></div>
+		</div>
+</body>
+</html>

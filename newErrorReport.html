@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html>
+<meta charset="UTF-8">
+<meta http-equiv="Access-Control-Allow-Origin" content="*">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"> 
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<head>
+<link rel="stylesheet" href="css/styleErrorReport.css?v=1.8" type="text/css" >
+<link rel="stylesheet" href="css/jquery-confirm.min.css" type="text/css" >
+<script type="text/javascript" src="js/jweixin-1.2.0.js"></script>
+<script type="text/javascript" src="js/jquery-1.10.2.min.js"></script>
+<script type="text/javascript" src="js/jshaker.js"></script>
+<script type="text/javascript" src="js/jquery-confirm.min.js"></script>
+<script type="text/javascript">  
+function alert(titleStr,contentStr) {
+    $.alert({
+        title: titleStr,
+        content: contentStr,
+        buttons: {
+            ok: {
+                text: "确定",
+                btnClass: 'btn-primary',
+                keys: ['enter'],
+            }
+        }
+    });
+}
+</script>  
+<meta charset="UTF-8">
+<title>新建申请单</title>
+<script type="text/javascript" >
+var START;
+var END;
+var recordTimer;
+var cardNo;
+var today;
+var isInitFinish;
+var mobile;
+var name;
+var departmentIndex;
+var departmentName;
+var questionType;
+var questionDesc;
+var memberList;
+var questionList;
+var localIds;
+var images = {
+		                     localId: [],
+		                     serverId: []
+		                   };
+var voice	= {
+        localId: [],
+        serverId: []
+      };	                   
+window.onload=function(){
+	var  a = window.location.href;
+	$.ajax({ 
+	    type : "POST", 
+	    contentType : "application/json", 
+	    url : "./InitializeErrorReportServlet?url=" + a, 
+	    dataType : 'json', 
+	    success : function(result) { 
+	        var timestamp = result.timestamp; 
+	        var noncestr = result.noncestr; 
+	        var signature =result.signature;
+	        cardNo = result.CardNo;
+			mobile = result.mobile;
+			name = result.name;
+			departmentIndex=result.departmentIndex;
+			departmentName=result.departmentName;
+			memberList = result.memberList;
+			questionList = result.questionList;
+			//把报修人 部门 联系方式分别赋值
+			document.getElementById("BXR").value=name;  
+			document.getElementById("BM").value=departmentName;
+			document.getElementById("TEL").value=mobile;
+			var data =  questionList;
+	    	var data2 = eval(data);
+	        for(var i in data2)
+		  	 {
+		        	var obj = data2[i];
+		        	  $("#QUESTIONTYPE").append(  //此处向select中循环绑定数据
+		       	    		"<option value="+obj.questionType+">" + obj.questionDesc+ "</option>");
+			 }
+
+	            //添加图片
+	            $("div .subMenu>img").each(function () {
+	                var name = $(this).attr("data-imgname");
+	                if(name=="new"){
+	                	var src = "images/" + name + "_active.png"
+	                	   //设置img的属性和值。
+		                $(this).attr("src", src);
+	                }else{
+	                	 var src = "images/" + name + ".png"
+	                	   //设置img的属性和值。
+	 	                $(this).attr("src", src);
+	                }
+	            });
+	            //点击事件
+	            $("div.subMenu").click(function () {
+	                var $img = $(this).children("img");
+	                var name = $img.attr("data-imgname");
+	                if(name=="myreport"){
+// 	                	激活图片,熄灭其他图片
+						$("#newReportImg").attr("src", "images/new.png");
+						$("#myreportImg").attr("src", "images/myreport_active.png");
+	                	//跳转到另一个页面
+	                	window.location.href='myRepairInfo.html?userId='+cardNo;
+	                	return;
+	                }
+	            });
+	        wx.config({  
+	        	beta: true,// 必须这么写，否则在微信插件有些jsapi会有问题
+	        	debug: false, //开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。  
+                appId: 'wwb27dcde4cb311a36', //必填，公众号的唯一标识  
+                timestamp: timestamp, // 必填，生成签名的时间戳  
+                nonceStr: noncestr, //必填，生成签名的随机串 
+                signature: signature,// 必填，签名，见附录1  
+                jsApiList: ['onMenuShareTimeline','onMenuShareAppMessage','onMenuShareQQ',  
+                            'onMenuShareWeibo','onMenuShareQZone','chooseImage',  
+                            'uploadImage','downloadImage','startRecord','stopRecord',  
+                            'onVoiceRecordEnd','playVoice','pauseVoice','stopVoice',  
+                            'translateVoice','openLocation','getLocation','hideOptionMenu',  
+                            'showOptionMenu','closeWindow','hideMenuItems','showMenuItems',  
+                            'showAllNonBaseMenuItem','hideAllNonBaseMenuItem'] //必填，需要使用的JS接口列表，所有JS接口列表 见附录2  
+            }); 
+	        
+	    } ,
+        error : function(xhr, status, errMsg)
+        {
+        	alert("提示","获取企业微信API失败!");
+             return;
+        }
+	}); 
+
+}
+</script>
+<script type="text/javascript">
+
+//确定发表提问  获得用户发表的内容
+function confirmTJ(){
+	var img = images.serverId.join();
+	  tel = $("#TEL").val();
+	  questionType = $("#QUESTIONTYPE").val();
+	  questionDesc = $("#QUESTIONDESC").val();
+	  if (tel == null || tel == undefined || tel == '') { 
+			alert("提示","联系方式不能为空!");
+		  return;
+	  }
+	  if (questionType == null || questionType == undefined || questionType == ''||questionType == -1) { 
+			alert("提示","问题类型不能为空!");
+		  return;
+	  }
+	  $("#confirmTJButton").attr("disabled", true);
+        $.ajax({
+                type:"POST",
+                url:"./ConfirmTJErrorReportServlet",
+                scriptCharset: 'utf-8',
+                data:{
+                 cardNo:cardNo,
+                 questionType:questionType,
+                 questionDesc:questionDesc,
+                 img:img,
+                 name:name,
+                 departmentIndex:departmentIndex,
+                 departmentName:departmentName,
+                 tel:tel,
+                },
+                dataType:"json",
+                success: function (result) {
+                 	var reslut1 = result.result;
+                 	if(reslut1=="S"){
+                 		alert("提示","提交成功!");
+                 	}
+                },
+                erro:function (){
+                	alert("提示","提交失败,请联系管理员!");
+                }
+            });
+   
+};
+</script>
+<script type="text/javascript">
+// $(document).ready(function(){
+// $('#talk_btn').on('touchstart', function(event){
+//     event.preventDefault();
+//     START = new Date().getTime();
+//     recordTimer = setTimeout(function(){
+//         wx.startRecord({
+//             success: function(){
+//                 localStorage.rainAllowRecord = 'true';
+//             },
+//             cancel: function () {
+//                 alert('用户拒绝授权录音');
+//             }
+//         });
+//     },300);
+// });
+// //松手结束录音
+// $('#talk_btn').on('touchend', function(event){
+//     event.preventDefault();
+//     END = new Date().getTime();
+//     if((END - START) < 300){
+//         END = 0;
+//         START = 0;
+//         //小于300ms，不录音
+//         clearTimeout(recordTimer);
+//     }else{
+//         wx.stopRecord({
+//           success: function (res) {
+//             voice.localId = res.localId;
+//             alert(res.localId);
+//             uploadVoice();
+//           },
+//           fail: function (res) {
+//             alert(JSON.stringify(res));
+//           }
+//         });
+//     }
+// });
+
+// //上传录音
+// function uploadVoice(){
+//     //调用微信的上传录音接口把本地录音先上传到微信的服务器
+//     //不过，微信只保留3天，而我们需要长期保存，我们需要把资源从微信服务器下载到自己的服务器
+//     wx.uploadVoice({
+//         localId: voice.localId, // 需要上传的音频的本地ID，由stopRecord接口获得
+//         isShowProgressTips: 1, // 默认为1，显示进度提示
+//         success: function (res) {
+//             //把录音在微信服务器上的id（res.serverId）发送到自己的服务器供下载。
+//             alert("上传录音成功");
+//             wx.playVoice({
+//                 localId: voice.localId // 需要播放的音频的本地ID，由stopRecord接口获得
+//             });
+// //             $.ajax({
+// //                 url: '后端处理上传录音的接口',
+// //                 type: 'post',
+// //                 data: JSON.stringify(res),
+// //                 dataType: "json",
+// //                 success: function (data) {
+// //                     alert('文件已经保存到七牛的服务器');//这回，我使用七牛存储
+// //                 },
+// //                 error: function (xhr, errorType, error) {
+// //                     console.log(error);
+// //                 }
+// //             });
+//         }
+//     });
+// }
+
+// //注册微信播放录音结束事件【一定要放在wx.ready函数内】
+// wx.onVoicePlayEnd({
+//     success: function (res) {
+//         stopWave();
+//     }
+// });
+// });
+</script>
+<script type="text/javascript">
+var finalsize;
+function uploadImage(){
+	//选择图片之前校验imgDiv下面的img个数不能超过6个
+	var size = $("#imgdiv > img").length;
+	if(size>=6){
+		alert("提示","图片数量不能超过六张!");
+		return;
+	}else{
+		finalsize = 6-size;
+	}
+	wx.ready(function(){
+		//选择多个图片
+		wx.chooseImage({
+		  count:finalsize,
+		  sizeType:['original','compressed'],
+		  sourceType:['album', 'camera'],
+		  success:function(res){
+		    var localIds=res.localIds;
+		    for (var i = 0; i < localIds.length; i++) {
+		      var localId=localIds[i];
+		      $("#imgdiv").append("<img   class =\"smallimage\" src=\""+localId+"\" />");
+		      wx.uploadImage({
+		    	    localId: localId, // 需要上传的图片的本地ID，由chooseImage接口获得
+		    	    isShowProgressTips: 1, // 默认为1，显示进度提示
+		    	    success: function (res) {
+		    	    	images.serverId.push(res.serverId);
+		    	    }
+		    	});
+		    }
+		    //将缩略图和查看大图结合在一起
+		    $(function(){  
+		        $(".smallimage").click(function(){  
+		            var _this = $(this);//将当前的smallimage元素作为_this传入函数  
+		            imgShow("#outerdiv", "#innerdiv", "#bigimg", _this);  
+		        });  
+		    });  
+
+		    function imgShow(outerdiv, innerdiv, bigimg, _this){  
+		        var src = _this.attr("src");//获取当前点击的smallimage元素中的src属性  
+		        $(bigimg).attr("src", src);//设置#bigimg元素的src属性  
+		      
+		            /*获取当前点击图片的真实大小，并显示弹出层及大图*/  
+		        $("<img/>").attr("src", src).load(function(){  
+		            var windowW = $(window).width();//获取当前窗口宽度  
+		            var windowH = $(window).height();//获取当前窗口高度  
+		            var realWidth = this.width;//获取图片真实宽度  
+		            var realHeight = this.height;//获取图片真实高度  
+		            var imgWidth, imgHeight;  
+		            var scale = 0.98;//缩放尺寸，当图片真实宽度和高度大于窗口宽度和高度时进行缩放  
+		            if(realHeight>windowH*scale) {//判断图片高度  
+		                imgHeight = windowH*scale;//如大于窗口高度，图片高度进行缩放  
+		                imgWidth = imgHeight/realHeight*realWidth;//等比例缩放宽度  
+		                if(imgWidth>windowW*scale) {//如宽度扔大于窗口宽度  
+		                    imgWidth = windowW*scale;//再对宽度进行缩放  
+		                }  
+		            } else if(realWidth>windowW*scale) {//如图片高度合适，判断图片宽度  
+		                imgWidth = windowW*scale;//如大于窗口宽度，图片宽度进行缩放  
+		                            imgHeight = imgWidth/realWidth*realHeight;//等比例缩放高度  
+		            } else {//如果图片真实高度和宽度都符合要求，高宽不变  
+		                imgWidth = realWidth;  
+		                imgHeight = realHeight;  
+		            }  
+		            $(bigimg).css("width",imgWidth);//以最终的宽度对图片缩放  
+		              
+		            var w = (windowW-imgWidth)/2;//计算图片与窗口左边距  
+		            var h = (windowH-imgHeight)/2;//计算图片与窗口上边距  
+		            $(innerdiv).css({"top":h, "left":w});//设置#innerdiv的top和left属性  
+		            $(outerdiv).fadeIn("fast");//淡入显示#outerdiv及.pimg  
+		        });  
+		        $(outerdiv).click(function(){//再次点击淡出消失弹出层  
+		            $(this).fadeOut("fast");  
+		        });  
+		    }  
+		  }
+		});
+		//添加图片的row
+		function addImg(src){
+		  var col=$('<div />');
+		  col.addClass('col-xs-6 col-md-3');
+		  var a=$('<a />');
+		  a.addClass('thumbnail');
+		  var img=$('<img />');
+		  img.attr('src',src);
+		  a.append(img).append(src);
+		  col.append(a);
+		  $('.row').append(col);
+		}
+
+	});
+}
+</script>
+<script type="text/javascript" async>
+$(document).ready(function(){
+   $('.confirmTJ').click(function(){
+	   $(this).shake(2, 10, 400);
+   });
+});
+</script>
+</head>
+<body background="images/BGP2.jpg"style=background-size:100%>
+<div class="editor-label" >
+		<label for="BXR">申请人</label>
+		<input type="text" name="BXR" id="BXR"  disabled />
+		<br />
+		<label for="BM">部门</label>
+		<input type="text" name="BM" id="BM"  disabled />
+		<br />
+		<label for="TEL">联系电话</label>
+		<input type="text" name="TEL" id="TEL" />
+		<br />
+		<label for="QUESTIONTYPE">问题类型</label>
+		<select id="QUESTIONTYPE" class ="select">
+		<option value="-1">--请选择--</option>
+		</select>
+		<br />
+		<label for="QUESTIONDESC">问题描述</label>
+<!-- 		<input type="text" name="QUESTIONDESC" id="QUESTIONDESC"    style="width:13rem"/> -->
+		<textarea rows="2"  name="QUESTIONDESC"  class="textarea" id="QUESTIONDESC"></textarea>
+		<br />
+		<label>上传图片</label>
+		<img onclick="uploadImage()" src="images/addImg.png">
+<!-- 		<button id="talk_btn"  >上传语音</button> -->
+		<div id ="imgdiv"></div>
+		<div id="outerdiv" style="position:fixed;top:0;left:0;background:rgba(0,0,0,0.7);z-index:2;width:100%;height:100%;display:none;">
+   	    <div id="innerdiv" style="position:absolute;">
+        <img id="bigimg" style="border:5px solid #fff;" src="" />
+    </div>
+</div> 
+	<br/>
+	<button type="button" id = "confirmTJButton" onclick ="confirmTJ()" class ="confirmTJ" >确认提交</button>
+	</div>
+		<br/>
+			<br/>
+				<br/>
+				<br/>
+			<br/>
+				<br/>
+	<div id="menu" class="menu">
+    <div id="newReport" class="subMenu" >
+        <img id="newReportImg" class="menu_img" data-imgname="new"/>
+    </div>
+    <div id="myreport" class="subMenu">
+        <img id="myreportImg" class="menu_img" data-imgname="myreport"/>
+    </div>
+
+</div>
+</body>
+</html>

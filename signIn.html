@@ -6,8 +6,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
 <head>
-<link rel="stylesheet" href="css/style.css?v=5.9" type="text/css" >
-
+<link rel="stylesheet" href="css/style.css?v=7.4" type="text/css" >
+<script type="text/javascript" src="js/calendar.js?v=1.9"></script>
 
   <script type="text/javascript" async>
   function  getSignDayByMonth(flag)
@@ -18,12 +18,13 @@
   		$.ajax({  
       	 	type : "POST", 
       	    contentType : "application/json", 
-      	    url : "./GetSignDayByMonthServlet?cardNo="+cardNo+"&month="+month+"&flag="+flag, 
+      	    url : "./GetSignDayByMonthServlet?cardNo="+cardNo+"&month="+month+"&WXID="+WXID+"&flag="+flag, 
       	    dataType : 'json', 
       	    success : function(result) { 
-      	    	var data =  result.signDayList;
-      	    	signList = eval(data);
-      	    	 calUtil.init(signList);
+      	    	var data =  result.errorDayList;
+      	    	errorList = eval(data);
+      	    	workList = eval(result.workDayList);
+      	    	 calUtil.init(errorList,workList);
       	    },
       	    error : function(xhr, status, errMsg)
               {
@@ -34,6 +35,7 @@
   	});
   }
   </script> 
+
   <script type="text/javascript" async>
   
 function getAddress(lat,lng)
@@ -63,19 +65,46 @@ function getAddress(lat,lng)
  	 	$.ajax({  
 		type : "POST", 
 		contentType : "application/json", 
-		url : "./GetRecordByDayServlet?date=" + date+"&cardNo="+cardNo, 
+		url : "./GetRecordByDayServlet?date="+date+"&cardNo="+cardNo+"&WXID="+WXID,
 		dataType : 'json', 
 	    success : function(result) { 
 	    	var data =  result.recordsList;
 	    	var data2 = eval(data);
-	    	var html = "<table width='100%'> <tr><th class = 'rtime' align = 'center'>时间</th><th class = 'location' align = 'center'>方式</th></tr>";  
-	        for(var i in data2)
-	  	 {
-	        	var obj = data2[i];
-	        	html= html+"<tr><td  align = 'center'>"+obj.entryDT+"</td><td align = 'center'>"+obj.signInName+"</td></tr>";  
-		 }
-	        html= html+"</table>";  
+	    	var data3 = result.errorList;
+	    	var html = "";
+	    	var html2= "";  
+	    	if(data3.length > 0){
+	    		html2 = "<table width='100%'> <tr><th class = 'rtime1' align = 'left'>缺勤时间</th><th class = 'location' align = 'left'>缺勤类型</th></tr>"
+	    		var data4 = eval(data3);
+	    		   for(var i in data4)
+	    		  	 {
+	    		        	var obj = data4[i];
+	    		        	html2= html2+"<tr></tr><tr><td class = 'td1' align = 'left'>"+obj.BEGUZ+"-"+obj.ENDUZ+"</td><td class = 'td1' align = 'left'>"+obj.AWART+"</td></tr>";  
+	    			 }
+	    	}
+	    	if(data.length>0){
+// 	    		<th class = 'location' align = 'center'>方式</th>
+			
+			if(html2 ==""){
+				var html = "<table width='100%'> <tr><th class = 'rtime' align = 'left'>考勤记录</th></tr>";  
+		        for(var i in data2)
+		  	 {
+		        	var obj = data2[i];
+		        	html= html+"<tr><td class = 'td1' align = 'left'>"+obj.entryDT+"</td><td class = 'td1' align = 'left'>"+obj.signInName+"</td></tr>";  
+			 }
+		        html= html+"</table>"; 
+		}else{
+			html2= html2+ "<tr></tr><tr></tr><tr></tr><tr></tr><tr><td class = 'title1'  align = 'left'>考勤记录</td></tr><tr></tr>";
+			   for(var i in data2)
+			  	 {
+			        	var obj = data2[i];
+			        	html2= html2+"<tr><td class = 'td1' align = 'left'>"+obj.entryDT+"</td><td class = 'td1' align = 'left'>"+obj.signInName+"</td></tr>";  
+				 }
+		}
+	    	}
+	        html2= html2+"</table>";  
 	        document.getElementById("recordsByday").innerHTML=html;  
+	        document.getElementById("errorRecord").innerHTML=html2;  
 	    },
 	    error : function(xhr, status, errMsg)
         {
@@ -279,26 +308,30 @@ function IsPC() {
 
 <script src = "http://map.qq.com/api/js?v=2.exp&key=NPABZ-G7LW4-DBLUP-XI2QT-4VCHE-UXFTD" async></script>
 <script type="text/javascript" src="js/jweixin-1.2.0.js"></script>
-<script type="text/javascript" src="js/jquery-1.4.3.min.js"></script>
+<script type="text/javascript" src="js/jquery-1.10.2.min.js"></script>
 <script type="text/javascript" src="js/jshaker.js"></script>
-<link rel="stylesheet" type="text/css" href="css/sign.css"/>
-<script type="text/javascript" src="js/calendar.js"></script>
+<link rel="stylesheet" type="text/css" href="css/sign.css?v=3.0"/>
   <script>
  function tdClick(node){
 	  var obj = document.getElementById('table1').getElementsByTagName('td');
-	    for (var i = 0; i < obj.length; i ++) obj[i].onclick = function() {
-	       //把日和年月组合在一起
-	    document.getElementById('calendar_month_span').innerHTML = calUtil.showYear+"年"+calUtil.showMonth+"月"+this.innerHTML+"日";
-	    var dateuse = calUtil.showYear+"-"+calUtil.showMonth+"-"+this.innerHTML;  
+	    document.getElementById('calendar_month_span').innerHTML = calUtil.showYear+"年"+calUtil.showMonth+"月"+$(node).context.innerHTML+"日";
+	    var dateuse = calUtil.showYear+"-"+calUtil.showMonth+"-"+$(node).context.innerHTML;  
+	    var td1Index = $('#table1 td').index($(node));
 	    getRecord(dateuse);
-	    };
-		$('#table1 td').each(function(){
-            $(this).click(function(){
-                $(this).css("background-color","#e3e3e4");//设置点击td的颜色
-                $(this).css("border-radius","55%");
-                $('#table1 td').not(this).css("background-color","transparent");//其他的全部设置为透明
-            });
-        });
+		for (var i = 0; i < obj.length; i ++){
+			if(i == td1Index){
+			}else{
+				if($(obj[i]).hasClass("notWork")){
+					$(obj[i]).css("background-color","#4f77aa")
+					$(obj[i]).css("color","#7ca2ce");
+				}else{
+					$(obj[i]).css("background-color","#4f77aa")
+					$(obj[i]).css("color","white");
+				}
+			}
+		}
+     	$(node).css("background-color","white");//设置点击td的颜色
+     	$(node).css("color","#4f77aa");//设置点击td的字体颜色 
 	}
 </script>
 
@@ -312,12 +345,15 @@ var cardNo;
 var today;
 var timer1;
 var signList;
+var errorList
+var workList;
 var isInitFinish;
+var WXID;
 window.onload=function(){
 	var flag = IsPC();
 	if(flag){
-// 		 window.location.href="PCError.html";
-// 		 return;
+		 window.location.href="PCError.html";
+		 return;
 	}
 	var  a = window.location.href;
 	$.ajax({ 
@@ -330,9 +366,10 @@ window.onload=function(){
 	        var noncestr = result.noncestr; 
 	        var signature =result.signature;
 	        cardNo = result.CardNo;
+	        WXID = result.WXID;
 	        if(result.CardNo==null){
-// 	        	 window.location.href="userInfoError.html";
-// 	        	 return;
+	        	 window.location.href="userInfoError.html";
+	        	 return;
 	       }
 	            //添加图片
 	            $("div .subMenu>img").each(function () {
@@ -349,7 +386,6 @@ window.onload=function(){
 	            });
 	            // 自动点击第一个菜单
 // 	            $("div.subMenu")[0].click();
-
 	            //点击事件
 	            $("div.subMenu").click(function () {
 	                var $img = $(this).children("img");
@@ -372,6 +408,7 @@ window.onload=function(){
 						document.getElementById("success").style.display="none";//隐藏
 						document.getElementById("calendar").style.display="none";//隐藏
 						document.getElementById("recordsByday").style.display="none";//隐藏
+						document.getElementById("errorRecord").style.display="none";//隐藏
 						document.getElementById("record").style.display="none";//隐藏打卡记录页面
 	                }
 	                if(name=="signIn"){
@@ -386,8 +423,10 @@ window.onload=function(){
 	                	$("#ifreamdiv").fadeIn();
 	                	document.getElementById("calendar").style.display="none";//隐藏
 						document.getElementById("recordsByday").style.display="none";//隐藏
+						document.getElementById("errorRecord").style.display="none";//隐藏
 						document.getElementById("ruleDiv").style.display="none";//隐藏规则页面
 						document.getElementById("record").style.display="none";//隐藏打卡记录页面
+						$("body").css("background-image","url(./images/BGP1.jpg)");
 	                }
 	                if(name=="calendar"){
 	                	//如果页面还没刷新的话则不进入日历页面 
@@ -405,14 +444,16 @@ window.onload=function(){
 	                		$.ajax({  
 	                    	 	type : "POST", 
 	                    	    contentType : "application/json", 
-	                    	    url : "./GetSignDayByMonthServlet?cardNo="+cardNo+"&month="+month, 
+	                    	    url : "./GetSignDayByMonthServlet?cardNo="+cardNo+"&month="+month+"&WXID="+WXID, 
 	                    	    dataType : 'json', 
 	                    	    success : function(result) { 
-	                    	    	var data =  result.signDayList;
-	                    	    	signList = eval(data);
-	                		    	 //ajax获取日历json数据
-	                		       calUtil.eventName="load";
-	                		  	   calUtil.init(signList);
+// 	                    	    	var data =  result.signDayList;
+								var data =  result.errorDayList;
+								errorList = eval(data);
+								workList = eval(result.workDayList);
+	                		   //ajax获取日历json数据
+	                		    calUtil.eventName="load";
+	                		  	calUtil.init(errorList,workList);
 	                    	    },
 	                    	    error : function(xhr, status, errMsg)
 	                            {
@@ -433,6 +474,8 @@ window.onload=function(){
 	                	//显示日历
 	                	$("#calendar").fadeIn();
 	                	$("#recordsByday").fadeIn();
+	                	$("#errorRecord").fadeIn();
+	                	$("body").css("background-image","url(./images/menu_bg.png)");
 	                }
 	            });
 	        today = result.today;
@@ -440,7 +483,7 @@ window.onload=function(){
 	        wx.config({  
 	        	beta: true,// 必须这么写，否则在微信插件有些jsapi会有问题
 	        	debug: false, //开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。  
-                appId: 'ww237859bf33ceef7f', //必填，公众号的唯一标识  
+                appId: 'wwb27dcde4cb311a36', //必填，公众号的唯一标识  
                 timestamp: timestamp, // 必填，生成签名的时间戳  
                 nonceStr: noncestr, //必填，生成签名的随机串 
                 signature: signature,// 必填，签名，见附录1  
@@ -608,7 +651,8 @@ function disptime(today){
 
 </head>
 <!-- style=" background-repeat:no-repeat ; -->
-<body background="images/BGP1.jpg"style=background-size:100% >
+<!-- background="images/BGP1.jpg"style=background-size:100% -->
+<body background="images/BGP1.jpg"style=background-size:100%>
 <div id="ifreamdiv"  class = "ifream" ></div>
 <div  id ="logo" class="logo"  onclick="refresh()" ><img src="images/logo.png" class="logoimg" ></div> 
 <div id="address"  class = "address" >
@@ -740,11 +784,17 @@ function disptime(today){
 </div>
 <div style="height:4rem;"></div>
 </div>
-<div id="calendar"  style="display:none"></div>
+<div id="calendar"  class = "ruleDiv" style="display:none">
+</div>
+<br>
+<div id = "errorRecord" class= "errorRecord" style="display:none">
+</div>
+<br>
 <div id="recordsByday" class="recordsByday" style="display:none">
 </div>
-
-
+<br>
+<br>
+<br>
 
 <!-- <!--   <div id="test"  onclick = "test()">单点测试</div> -->
 <!--   <script src="js/attendanceCalendar.js"></script> -->

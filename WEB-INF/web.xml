@@ -85,8 +85,109 @@
     <servlet-name>GetSignDayByMonthServlet</servlet-name>
     <url-pattern>/GetSignDayByMonthServlet</url-pattern>
   </servlet-mapping>
+  <!--   初始化新建故障报修 -->
+  <servlet>
+    <servlet-name>InitializeErrorReportServlet</servlet-name>
+    <servlet-class>com.rj.errorreport.InitializeErrorReport</servlet-class>
+  	  </servlet>
+  <servlet-mapping>
+    <servlet-name>InitializeErrorReportServlet</servlet-name>
+    <url-pattern>/InitializeErrorReportServlet</url-pattern>
+  </servlet-mapping>
+    <!--   确认提交新建故障报修 -->
+  <servlet>
+    <servlet-name>ConfirmTJErrorReportServlet</servlet-name>
+    <servlet-class>com.rj.errorreport.ConfirmTJErrorReport</servlet-class>
+  	  </servlet>
+  <servlet-mapping>
+    <servlet-name>ConfirmTJErrorReportServlet</servlet-name>
+    <url-pattern>/ConfirmTJErrorReportServlet</url-pattern>
+  </servlet-mapping>
+<!--   根据单号查询出报修单明细信息 -->
+   <servlet>
+    <servlet-name>ErrorReportDetailServlet</servlet-name>
+    <servlet-class>com.rj.errorreport.ErrorReportDetail</servlet-class>
+  	  </servlet>
+  <servlet-mapping>
+    <servlet-name>ErrorReportDetailServlet</servlet-name>
+    <url-pattern>/ErrorReportDetailServlet</url-pattern>
+  </servlet-mapping>
+<!--   报修单已处理完成 -->
+     <servlet>
+    <servlet-name>ResolvedErrorReportServlet</servlet-name>
+    <servlet-class>com.rj.errorreport.ResolvedErrorReport</servlet-class>
+  	  </servlet>
+  <servlet-mapping>
+    <servlet-name>ResolvedErrorReportServlet</servlet-name>
+    <url-pattern>/ResolvedErrorReportServlet</url-pattern>
+  </servlet-mapping>
+<!--   保修单已解决 -->
+     <servlet>
+    <servlet-name>Resolved2ErrorReportServlet</servlet-name>
+    <servlet-class>com.rj.errorreport.Resolved2ErrorReport</servlet-class>
+  	  </servlet>
+  <servlet-mapping>
+    <servlet-name>Resolved2ErrorReportServlet</servlet-name>
+    <url-pattern>/Resolved2ErrorReportServlet</url-pattern>
+  </servlet-mapping>
   
-  <servlet>    
+<!--   保修单转给下一节点 -->
+    <servlet>
+    <servlet-name>ToNextProServlet</servlet-name>
+    <servlet-class>com.rj.errorreport.ToNextPro</servlet-class>
+  	  </servlet>
+  <servlet-mapping>
+    <servlet-name>ToNextProServlet</servlet-name>
+    <url-pattern>/ToNextProServlet</url-pattern>
+  </servlet-mapping>
+
+<!--   提交报修单评分 -->
+    <servlet>
+    <servlet-name>ConfirmScoreServlet</servlet-name>
+    <servlet-class>com.rj.errorreport.ConfirmScore</servlet-class>
+  	  </servlet>
+  <servlet-mapping>
+    <servlet-name>ConfirmScoreServlet</servlet-name>
+    <url-pattern>/ConfirmScoreServlet</url-pattern>
+  </servlet-mapping>
+<!-- 我的保修单初始化 -->
+  <servlet>
+    <servlet-name>InitializeMyErrorReportServlet</servlet-name>
+    <servlet-class>com.rj.errorreport.InitializeMyErrorReport</servlet-class>
+  	  </servlet>
+  <servlet-mapping>
+    <servlet-name>InitializeMyErrorReportServlet</servlet-name>
+    <url-pattern>/InitializeMyErrorReportServlet</url-pattern>
+  </servlet-mapping>
+<!--  再次提醒  -->
+<servlet>
+    <servlet-name>RemindServlet</servlet-name>
+    <servlet-class>com.rj.errorreport.Remind</servlet-class>
+  	  </servlet>
+  <servlet-mapping>
+    <servlet-name>RemindServlet</servlet-name>
+    <url-pattern>/RemindServlet</url-pattern>
+  </servlet-mapping>
+<!--   党费查询初始化 -->
+<servlet>
+    <servlet-name>InitDfcxServlet</servlet-name>
+    <servlet-class>com.rj.dfcx.InitDfcx</servlet-class>
+  	  </servlet>
+  <servlet-mapping>
+    <servlet-name>InitDfcxServlet</servlet-name>
+    <url-pattern>/InitDfcxServlet</url-pattern>
+  </servlet-mapping>
+<!--  查询党费  -->
+<servlet>
+    <servlet-name>CXDFServlet</servlet-name>
+    <servlet-class>com.rj.dfcx.CXDF</servlet-class>
+  	  </servlet>
+  <servlet-mapping>
+    <servlet-name>CXDFServlet</servlet-name>
+    <url-pattern>/CXDFServlet</url-pattern>
+  </servlet-mapping>
+
+  <servlet>  
     <servlet-name>AxisServlet</servlet-name>    
     <servlet-class>org.apache.axis2.transport.http.AxisServlet</servlet-class>    
     <load-on-startup>2</load-on-startup>    

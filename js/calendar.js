@@ -9,29 +9,28 @@ var calUtil = {
   
   
   //初始化日历
-  init:function(signList){
+  init:function(errorDayList,workList){
     calUtil.setMonthAndDay();
-    calUtil.draw(signList);
-    calUtil.bindEnvent(signList);
+    calUtil.draw(errorDayList,workList);
+    calUtil.bindEnvent(errorDayList);
   },
   
-  draw:function(signList){
+  draw:function(errorDayList,workList){
     //绑定日历
-    var str = calUtil.drawCal(calUtil.showYear,calUtil.showMonth,signList);
+    var str = calUtil.drawCal(calUtil.showYear,calUtil.showMonth,errorDayList,workList);
     $("#calendar").html(str);
     //绑定日历表头
     var calendarName=calUtil.showYear+"年"+calUtil.showMonth+"月";
     $(".calendar_month_span").html(calendarName);  
   },
   //绑定事件
-  bindEnvent:function(signList){
+  bindEnvent:function(errorDayList){
     //绑定上个月事件
     $(".calendar_month_prev").click(function(){
       //ajax获取日历json数据
       calUtil.eventName="prev";
       var flag = "pre";
       getSignDayByMonth(flag);
-     
     });
     //绑定下个月事件
     $(".calendar_month_next").click(function(){
@@ -109,17 +108,27 @@ var calUtil = {
    }
    return aMonth;
   },
-  ifHasSigned : function(signList,day){
+  ifHasSigned : function(errorDayList,day){
    var signed = false;
-   $.each(signList,function(index,item){
-    if(item.signDay == day) {
+   $.each(errorDayList,function(index,item){
+    if(item.errorDay == day) {
      signed = true;
      return false;
     }
    });
    return signed ;
   },
-  drawCal : function(iYear, iMonth ,signList) {
+  ifWorkDay : function(workDayList,day){
+	   var workday = false;
+	   $.each(workDayList,function(index,item){
+	    if(item.workDay == day) {
+	    workday = true;
+	     return false;
+	    }
+	   });
+	   return workday ;
+	  },
+  drawCal : function(iYear, iMonth ,errorDayList,workList) {
    var myMonth = calUtil.bulidCal(iYear, iMonth);
    var htmls = new Array();
    htmls.push("<div class='sign_main' id='sign_layer'>");
@@ -128,10 +137,11 @@ var calUtil = {
    htmls.push("<div class='calendar_month_prev'></div>");
    htmls.push("<div id = 'calendar_month_span' class='calendar_month_span'></div>");
    htmls.push("</div>");
+   htmls.push("<div id = 'blank' class='blank'></div>");
    htmls.push("<div class='sign' id='sign_cal'>");
    htmls.push("<table id='table1' class='table1'>");
    htmls.push("<tr>");
-   htmls.push("<th>" + myMonth[0][0] + "</th>");
+   htmls.push("<th class ='weekCss'>" + myMonth[0][0] + "</th>");
    htmls.push("<th>" + myMonth[0][1] + "</th>");
    htmls.push("<th>" + myMonth[0][2] + "</th>");
    htmls.push("<th>" + myMonth[0][3] + "</th>");
@@ -143,12 +153,39 @@ var calUtil = {
    for (w = 1; w < 6; w++) {
     htmls.push("<tr>");
     for (d = 0; d < 7; d++) {
-     var ifHasSigned = calUtil.ifHasSigned(signList,myMonth[w][d]);
+     var ifHasSigned = calUtil.ifHasSigned(errorDayList,myMonth[w][d]);
+     var ifWorkDay = calUtil.ifWorkDay(workList,myMonth[w][d]);
      console.log(ifHasSigned);
      if(ifHasSigned){
-      htmls.push("<td  onclick='tdClick(this)' class='on'>" + (!isNaN(myMonth[w][d]) ? myMonth[w][d] : " ") + "</td>");
+    	 if(ifWorkDay){
+    		 //工作日
+    		 if(!isNaN(myMonth[w][d])){
+    			 htmls.push("<td  onclick='tdClick(this)' class='onWorkError'>" + (!isNaN(myMonth[w][d]) ? myMonth[w][d] : " ") + "</td>");
+    		 }else{
+    			 htmls.push("<td class ='ds'>" + (!isNaN(myMonth[w][d]) ? myMonth[w][d] : " ") + "</td>");
+    		 }
+    		 
+    	 }else{
+    		 if(!isNaN(myMonth[w][d])){
+    			 htmls.push("<td  onclick='tdClick(this)' class='onNotWorkError'>" + (!isNaN(myMonth[w][d]) ? myMonth[w][d] : " ") + "</td>");
+    		 }else{
+    			 htmls.push("<td class ='ds'>" + (!isNaN(myMonth[w][d]) ? myMonth[w][d] : " ") + "</td>");
+    		 }
+    	 }
      } else {
-      htmls.push("<td onclick='tdClick(this)'>" + (!isNaN(myMonth[w][d]) ? myMonth[w][d] : " ") + "</td>");
+    	 if(ifWorkDay){
+    		 if(!isNaN(myMonth[w][d])){
+    			  htmls.push("<td onclick='tdClick(this)' class= 'Work'>" + (!isNaN(myMonth[w][d]) ? myMonth[w][d] : " ") + "</td>");
+    		 }else{
+    			 htmls.push("<td class ='ds'>" + (!isNaN(myMonth[w][d]) ? myMonth[w][d] : " ") + "</td>");
+    		 }
+    	 }else{
+    		 if(!isNaN(myMonth[w][d])){
+    			  htmls.push("<td onclick='tdClick(this)' class= 'notWork'>" + (!isNaN(myMonth[w][d]) ? myMonth[w][d] : " ") + "</td>");
+    		 }else{
+    			 htmls.push("<td class ='ds'>" + (!isNaN(myMonth[w][d]) ? myMonth[w][d] : " ") + "</td>");
+    		 }
+    	 }
      }
     }
     htmls.push("</tr>");
